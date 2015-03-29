@@ -1,0 +1,35 @@
+From a99423e1adb6d9775b46af66d5b6da5ab0d04373 Mon Sep 17 00:00:00 2001
+From: Alexander Couzens <lynxis@fe80.eu>
+Date: Sun, 29 Mar 2015 00:40:03 +0100
+Subject: [PATCH 7/9] FIXUP
+ usb-dbgp-gadget-Fix-re-connecting-after-USB-disconnet patch
+
+---
+ ...998-usb-dbgp-gadget-Fix-re-connecting-after-USB-disconne.patch | 8 ++++----
+ 1 file changed, 4 insertions(+), 4 deletions(-)
+
+diff --git a/target/linux/generic/patches-3.18/998-usb-dbgp-gadget-Fix-re-connecting-after-USB-disconne.patch b/target/linux/generic/patches-3.18/998-usb-dbgp-gadget-Fix-re-connecting-after-USB-disconne.patch
+index bf962e3..9ff4603 100644
+--- a/target/linux/generic/patches-3.18/998-usb-dbgp-gadget-Fix-re-connecting-after-USB-disconne.patch
++++ b/target/linux/generic/patches-3.18/998-usb-dbgp-gadget-Fix-re-connecting-after-USB-disconne.patch
+@@ -19,13 +19,13 @@ previously returned as GET_DESCRIPTOR DT_DEBUG response.
+ 
+ Signed-off-by: Kyösti Mälkki <kyosti.malkki@gmail.com>
+ ---
+- drivers/usb/gadget/dbgp.c | 39 ++++++++++++++++++++++++++-------------
++ drivers/usb/gadget/legacy/dbgp.c | 39 ++++++++++++++++++++++++++-------------
+  1 file changed, 26 insertions(+), 13 deletions(-)
+ 
+-diff --git a/drivers/usb/gadget/dbgp.c b/drivers/usb/gadget/dbgp.c
++diff --git a/drivers/usb/gadget/legacy/dbgp.c b/drivers/usb/gadget/legacy/dbgp.c
+ index 986fc51..c9dcba3 100644
+---- a/drivers/usb/gadget/dbgp.c
+-+++ b/drivers/usb/gadget/dbgp.c
++--- a/drivers/usb/gadget/legacy/dbgp.c
+++++ b/drivers/usb/gadget/legacy/dbgp.c
+ @@ -214,6 +214,7 @@ static void dbgp_disconnect(struct usb_gadget *gadget)
+  #ifdef CONFIG_USB_G_DBGP_PRINTK
+  	dbgp_disable_ep();
+-- 
+2.3.3
+

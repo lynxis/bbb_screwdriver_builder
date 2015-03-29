@@ -1,0 +1,25 @@
+From fe1c820ad53f7a164c4db9c64885a262f3cab2a8 Mon Sep 17 00:00:00 2001
+From: Alexander Couzens <lynxis@fe80.eu>
+Date: Mon, 16 Mar 2015 02:44:55 +0100
+Subject: [PATCH 1/9] tools: compile mtools and dosfstools when building omap
+
+---
+ tools/Makefile | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/tools/Makefile b/tools/Makefile
+index 35f5d86..fdd6948 100644
+--- a/tools/Makefile
++++ b/tools/Makefile
+@@ -32,7 +32,7 @@ tools-$(CONFIG_TARGET_orion_generic) += wrt350nv2-builder upslug2
+ tools-$(CONFIG_powerpc) += upx
+ tools-$(CONFIG_TARGET_x86) += qemu
+ tools-$(CONFIG_TARGET_mxs) += elftosb
+-tools-$(CONFIG_TARGET_brcm2708)$(CONFIG_TARGET_sunxi)$(CONFIG_TARGET_mxs) += mtools dosfstools
++tools-$(CONFIG_TARGET_brcm2708)$(CONFIG_TARGET_sunxi)$(CONFIG_TARGET_mxs)$(CONFIG_TARGET_omap) += mtools dosfstools
+ tools-$(CONFIG_TARGET_ar71xx) += lzma-old squashfs
+ tools-y += lzma squashfs4
+ tools-$(BUILD_B43_TOOLS) += b43-tools
+-- 
+2.3.3
+

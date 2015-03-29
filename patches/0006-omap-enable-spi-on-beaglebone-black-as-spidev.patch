@@ -1,0 +1,54 @@
+From d4b4461716c501a5c965079b409178ac4fc5c3f4 Mon Sep 17 00:00:00 2001
+From: Alexander Couzens <lynxis@fe80.eu>
+Date: Sun, 29 Mar 2015 00:07:51 +0100
+Subject: [PATCH 6/9] omap: enable spi on beaglebone black as spidev
+
+---
+ .../patches-3.18/999-enable-spi0-as-spidev.patch   | 35 ++++++++++++++++++++++
+ 1 file changed, 35 insertions(+)
+ create mode 100644 target/linux/omap/patches-3.18/999-enable-spi0-as-spidev.patch
+
+diff --git a/target/linux/omap/patches-3.18/999-enable-spi0-as-spidev.patch b/target/linux/omap/patches-3.18/999-enable-spi0-as-spidev.patch
+new file mode 100644
+index 0000000..b2067fc
+--- /dev/null
++++ b/target/linux/omap/patches-3.18/999-enable-spi0-as-spidev.patch
+@@ -0,0 +1,35 @@
++Index: linux-3.18.8/arch/arm/boot/dts/am335x-boneblack.dts
++===================================================================
++--- linux-3.18.8.orig/arch/arm/boot/dts/am335x-boneblack.dts	2015-02-27 02:49:36.000000000 +0100
+++++ linux-3.18.8/arch/arm/boot/dts/am335x-boneblack.dts	2015-03-28 19:39:13.038957438 +0100
++@@ -64,11 +64,30 @@
++ 			0x1b0 0x03      /* xdma_event_intr0, OMAP_MUX_MODE3 | AM33XX_PIN_OUTPUT */
++ 		>;
++ 	};
+++	spi0_pins: pinmux_spi0_pins {
+++		pinctrl-single,pins = <
+++			0x150 (PIN_INPUT_PULLUP | MUX_MODE0)    /* spi0_sclk */
+++			0x154 (PIN_INPUT_PULLUP | MUX_MODE0)    /* spi0_d0 */
+++			0x158 (PIN_OUTPUT_PULLUP | MUX_MODE0)   /* spi0_d1 */
+++			0x15c (PIN_OUTPUT_PULLUP | MUX_MODE0)   /* spi0_cs0 */
+++		>;
+++	};
++ };
++ 
++ &lcdc {
++ 	status = "okay";
++ };
+++ 
+++&spi0 {
+++  status = "okay";
+++  pinctrl-names = "default";
+++  pinctrl-0 = <&spi0_pins>;
+++  spidev@0 {
+++    spi-max-frequency = <24000000>;
+++    reg = <0>;
+++    compatible = "linux,spidev";
+++  };
+++};
++ 
++ / {
++ 	hdmi {
+-- 
+2.3.3
+

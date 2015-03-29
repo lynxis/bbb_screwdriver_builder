@@ -1,0 +1,184 @@
+From 613209d0e40b8fc95f4a5fc81b8dbdf7ca54dca1 Mon Sep 17 00:00:00 2001
+From: Alexander Couzens <lynxis@fe80.eu>
+Date: Mon, 16 Mar 2015 03:03:47 +0100
+Subject: [PATCH 5/9] linux/generic: add usb gadget fix which allows a smooth
+ debugging without reconnect
+
+These device prevent the usb debug serial from closing when the remote device powercycles
+---
+ ...dget-Fix-re-connecting-after-USB-disconne.patch | 116 +++++++++++++++++++++
+ ...gadget-no-TTY-hangup-on-USB-disconnect-WI.patch |  39 +++++++
+ 2 files changed, 155 insertions(+)
+ create mode 100644 target/linux/generic/patches-3.18/998-usb-dbgp-gadget-Fix-re-connecting-after-USB-disconne.patch
+ create mode 100644 target/linux/generic/patches-3.18/999-usb-serial-gadget-no-TTY-hangup-on-USB-disconnect-WI.patch
+
+diff --git a/target/linux/generic/patches-3.18/998-usb-dbgp-gadget-Fix-re-connecting-after-USB-disconne.patch b/target/linux/generic/patches-3.18/998-usb-dbgp-gadget-Fix-re-connecting-after-USB-disconne.patch
+new file mode 100644
+index 0000000..bf962e3
+--- /dev/null
++++ b/target/linux/generic/patches-3.18/998-usb-dbgp-gadget-Fix-re-connecting-after-USB-disconne.patch
+@@ -0,0 +1,116 @@
++From f416546045bc0368cedf2b6c83b9f949ac8a12ee Mon Sep 17 00:00:00 2001
++From: =?UTF-8?q?Ky=C3=B6sti=20M=C3=A4lkki?= <kyosti.malkki@gmail.com>
++Date: Mon, 26 Aug 2013 18:23:18 +0300
++Subject: [PATCH 1/2] usb dbgp gadget: Fix re-connecting after USB disconnect
++MIME-Version: 1.0
++Content-Type: text/plain; charset=UTF-8
++Content-Transfer-Encoding: 8bit
++
++SET_FEATURE request for DEBUG_MODE only worked the first time after module
++initialisation. On USB host reset or cable disconnect gserial_disconnect()
++clears the associations dbgp.serial->in->desc and dbgp_serial->out->desc.
++
++Per the USB 2.0 debug device specification, SET_FEATURE with DEBUG_MODE
++is to be treated as if it were a SET_CONFIGURATION request. Redo endpoint
++configuration on this request.
++
++Code has assumption that endpoint mapping remains unchanged from what was
++previously returned as GET_DESCRIPTOR DT_DEBUG response.
++
++Signed-off-by: Kyösti Mälkki <kyosti.malkki@gmail.com>
++---
++ drivers/usb/gadget/dbgp.c | 39 ++++++++++++++++++++++++++-------------
++ 1 file changed, 26 insertions(+), 13 deletions(-)
++
++diff --git a/drivers/usb/gadget/dbgp.c b/drivers/usb/gadget/dbgp.c
++index 986fc51..c9dcba3 100644
++--- a/drivers/usb/gadget/dbgp.c
+++++ b/drivers/usb/gadget/dbgp.c
++@@ -214,6 +214,7 @@ static void dbgp_disconnect(struct usb_gadget *gadget)
++ #ifdef CONFIG_USB_G_DBGP_PRINTK
++ 	dbgp_disable_ep();
++ #else
+++	dev_dbg(&dbgp.gadget->dev, "disconnected\n");
++ 	gserial_disconnect(dbgp.serial);
++ #endif
++ }
++@@ -235,7 +236,7 @@ static void dbgp_unbind(struct usb_gadget *gadget)
++ static unsigned char tty_line;
++ #endif
++ 
++-static int __init dbgp_configure_endpoints(struct usb_gadget *gadget)
+++static int dbgp_configure_endpoints(struct usb_gadget *gadget)
++ {
++ 	int stp;
++ 
++@@ -271,19 +272,10 @@ static int __init dbgp_configure_endpoints(struct usb_gadget *gadget)
++ 
++ 	dbgp.serial->in->desc = &i_desc;
++ 	dbgp.serial->out->desc = &o_desc;
++-
++-	if (gserial_alloc_line(&tty_line)) {
++-		stp = 3;
++-		goto fail_3;
++-	}
+++#endif
++ 
++ 	return 0;
++ 
++-fail_3:
++-	dbgp.o_ep->driver_data = NULL;
++-#else
++-	return 0;
++-#endif
++ fail_2:
++ 	dbgp.i_ep->driver_data = NULL;
++ fail_1:
++@@ -322,10 +314,17 @@ static int __init dbgp_bind(struct usb_gadget *gadget,
++ 		err = -ENOMEM;
++ 		goto fail;
++ 	}
+++
+++	if (gserial_alloc_line(&tty_line)) {
+++		stp = 4;
+++		err = -ENODEV;
+++		goto fail;
+++	}
++ #endif
+++
++ 	err = dbgp_configure_endpoints(gadget);
++ 	if (err < 0) {
++-		stp = 4;
+++		stp = 5;
++ 		goto fail;
++ 	}
++ 
++@@ -377,12 +376,26 @@ static int dbgp_setup(struct usb_gadget *gadget,
++ 		err = 0;
++ 	} else if (request == USB_REQ_SET_FEATURE &&
++ 		   value == USB_DEVICE_DEBUG_MODE) {
++-		dev_dbg(&dbgp.gadget->dev, "setup: feat debug\n");
++ #ifdef CONFIG_USB_G_DBGP_PRINTK
++ 		err = dbgp_enable_ep();
++ #else
+++		if (!(dbgp.serial->in && dbgp.serial->in->desc &&
+++			dbgp.serial->out && dbgp.serial->out->desc)) {
+++			dev_dbg(&dbgp.gadget->dev, "needs reconfiguration\n");
+++			err = dbgp_configure_endpoints(gadget);
+++			if (err < 0) {
+++				goto fail;
+++			}
+++		}
+++		if (dbgp.serial->in && dbgp.serial->in->desc &&
+++			dbgp.serial->out && dbgp.serial->out->desc) {
+++			dev_dbg(&dbgp.gadget->dev, "epIn %02x, epOut %02x\n",
+++				dbgp.serial->in->desc->bEndpointAddress,
+++				dbgp.serial->out->desc->bEndpointAddress);
+++		}
++ 		err = gserial_connect(dbgp.serial, tty_line);
++ #endif
+++		dev_dbg(&dbgp.gadget->dev, "setup: feat debug (%d)\n", err);
++ 		if (err < 0)
++ 			goto fail;
++ 	} else
++-- 
++1.8.1.1
++
+diff --git a/target/linux/generic/patches-3.18/999-usb-serial-gadget-no-TTY-hangup-on-USB-disconnect-WI.patch b/target/linux/generic/patches-3.18/999-usb-serial-gadget-no-TTY-hangup-on-USB-disconnect-WI.patch
+new file mode 100644
+index 0000000..dfb771a
+--- /dev/null
++++ b/target/linux/generic/patches-3.18/999-usb-serial-gadget-no-TTY-hangup-on-USB-disconnect-WI.patch
+@@ -0,0 +1,39 @@
++From d2702eb8157f845c81b1a6049139f342f12db494 Mon Sep 17 00:00:00 2001
++From: =?UTF-8?q?Ky=C3=B6sti=20M=C3=A4lkki?= <kyosti.malkki@gmail.com>
++Date: Mon, 26 Aug 2013 19:19:44 +0300
++Subject: [PATCH 2/2] usb serial gadget: no TTY hangup on USB disconnect [WIP]
++MIME-Version: 1.0
++Content-Type: text/plain; charset=UTF-8
++Content-Transfer-Encoding: 8bit
++
++We may want to maintain the TTY over USB disconnects.
++
++This is useful when we have a terminal console to a host which
++power-cycles or for other reasons resets the USB host controller.
++
++Signed-off-by: Kyösti Mälkki <kyosti.malkki@gmail.com>
++---
++ drivers/usb/gadget/u_serial.c | 5 +++++
++ 1 file changed, 5 insertions(+)
++
++diff --git a/drivers/usb/gadget/u_serial.c b/drivers/usb/gadget/u_serial.c
++index b369292..d156a28 100644
++--- a/drivers/usb/gadget/u_serial.c
+++++ b/drivers/usb/gadget/u_serial.c
++@@ -1258,8 +1258,13 @@ void gserial_disconnect(struct gserial *gser)
++ 	gser->ioport = NULL;
++ 	if (port->port.count > 0 || port->openclose) {
++ 		wake_up_interruptible(&port->drain_wait);
+++#if 0
++ 		if (port->port.tty)
++ 			tty_hangup(port->port.tty);
+++#else
+++		if (port->port.tty)
+++			stop_tty(port->port.tty);
+++#endif
++ 	}
++ 	spin_unlock_irqrestore(&port->port_lock, flags);
++ 
++-- 
++1.8.1.1
++
+-- 
+2.3.3
+

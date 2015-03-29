@@ -1,0 +1,31 @@
+From 9597690406c51e4b93e080f6ce0ca17692754bbe Mon Sep 17 00:00:00 2001
+From: Alexander Couzens <lynxis@fe80.eu>
+Date: Sun, 29 Mar 2015 00:55:36 +0100
+Subject: [PATCH 9/9] another try to fix musb iwth am3xx
+
+---
+ package/kernel/linux/modules/usb.mk | 8 +++++++-
+ 1 file changed, 7 insertions(+), 1 deletion(-)
+
+diff --git a/package/kernel/linux/modules/usb.mk b/package/kernel/linux/modules/usb.mk
+index 7916bf7..11fc66a 100644
+--- a/package/kernel/linux/modules/usb.mk
++++ b/package/kernel/linux/modules/usb.mk
+@@ -47,7 +47,13 @@ define KernelPackage/usb-musb-hdrc
+ 	CONFIG_USB_MUSB_DUAL_ROLE=y \
+ 	CONFIG_USB_MUSB_GADGET=n \
+ 	CONFIG_USB_MUSB_HOST=n \
+-	CONFIG_USB_MUSB_DEBUG=y
++	CONFIG_USB_MUSB_DEBUG=y \
++	CONFIG_USB_MUSB_OMAP2PLUS=m \
++	CONFIG_USB_MUSB_AM35X=m \
++	CONFIG_USB_MUSB_UX500=m \
++	CONFIG_MUSB_PIO_ONLY=n \
++	CONFIG_USB_UX500_DMA=n \
++	CONFIG_USB_TI_CPPI41_DMA=y
+   DEPENDS:= \
+ 	@(TARGET_omap||TARGET_omap24xx) +kmod-usb-gadget \
+ 	+TARGET_omap24xx:kmod-usb-musb-tusb6010
+-- 
+2.3.3
+
