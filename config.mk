@@ -2,6 +2,6 @@
 SHELL:=$(shell which bash)
 TARGET=omap
 PACKAGES_LIST_DEFAULT=default
-OPENWRT_SRC=git://git.openwrt.org/openwrt.git
-OPENWRT_COMMIT=74afe30d71856be6cf8a02f3c0e598da515c4d89
+OPENWRT_SRC=git://git.openwrt.org/15.05/openwrt.git
+OPENWRT_COMMIT=9349aab7b4824d588af068bc82784cfd56d3372c
 MAKE_ARGS=
