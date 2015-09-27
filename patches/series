@@ -1,5 +1,4 @@
 0001-tools-compile-mtools-and-dosfstools-when-building-om.patch
-0002-target-omap-image-add-sdcard-image-based-on-sunxi.patch
 0003-kernel-spi-add-kernel-package-for-spi-omap-24xx.patch
 0004-package-kernel-add-usb-gadget-ehci-debug-driver.patch
 0005-linux-generic-add-usb-gadget-fix-which-allows-a-smoo.patch
