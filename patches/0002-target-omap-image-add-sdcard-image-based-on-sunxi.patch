@@ -1,19 +1,3 @@
-From d69b5c461ede6a3caf31a6cec0201e2423ba0504 Mon Sep 17 00:00:00 2001
-From: Alexander Couzens <lynxis@fe80.eu>
-Date: Mon, 16 Mar 2015 02:49:48 +0100
-Subject: [PATCH 2/9] target/omap/image: add sdcard image based on sunxi
-
-Flash the sdcard image via `dd if=openwrt-omap-beagleboneblack-sdcard-vfat-am335x_evm.img of=/dev/<sdcard device>`
----
- target/linux/omap/image/Config.in              |  5 ++++
- target/linux/omap/image/Makefile               | 37 ++++++++++++++++++++++++++
- target/linux/omap/image/gen_omap_sdcard_img.sh | 33 +++++++++++++++++++++++
- target/linux/omap/image/uEnv.txt               |  6 +++++
- 4 files changed, 81 insertions(+)
- create mode 100644 target/linux/omap/image/Config.in
- create mode 100755 target/linux/omap/image/gen_omap_sdcard_img.sh
- create mode 100644 target/linux/omap/image/uEnv.txt
-
 diff --git a/target/linux/omap/image/Config.in b/target/linux/omap/image/Config.in
 new file mode 100644
 index 0000000..08b88eb
@@ -26,16 +10,21 @@ index 0000000..08b88eb
 +	default 20
 +
 diff --git a/target/linux/omap/image/Makefile b/target/linux/omap/image/Makefile
-index ed3d90d..bca00eb 100644
+index 3fa2848..0e304d0 100644
 --- a/target/linux/omap/image/Makefile
 +++ b/target/linux/omap/image/Makefile
-@@ -10,12 +10,48 @@ include $(INCLUDE_DIR)/image.mk
+@@ -6,10 +6,33 @@
+ #
+ include $(TOPDIR)/rules.mk
+ include $(INCLUDE_DIR)/image.mk
++include $(INCLUDE_DIR)/host.mk
++
++FAT32_BLOCK_SIZE=1024
++FAT32_BLOCKS=$(shell echo $$(($(CONFIG_OMAP_SD_BOOT_PARTSIZE)*1024*1024/$(FAT32_BLOCK_SIZE))))
+ 
  UBIFS_OPTS = -F -m 2048 -e 124KiB -c 4096 -U
  UBI_OPTS = -m 2048 -p 128KiB -s 512 -O 2048
  
-+FAT32_BLOCK_SIZE=1024
-+FAT32_BLOCKS=$(shell echo $$(($(CONFIG_OMAP_SD_BOOT_PARTSIZE)*1024*1024/$(FAT32_BLOCK_SIZE))))
-+
 +# $1 - name of bootloader directory under BIN_DIR
 +# $2 - output filename part
 +define Image/Build/SDCard
@@ -56,29 +45,18 @@ index ed3d90d..bca00eb 100644
 +endef
 +
  define Image/BuildKernel
- 	$(CP) $(KDIR)/zImage $(BIN_DIR)/openwrt-$(BOARD)-zImage
+ 	$(CP) $(KDIR)/zImage $(BIN_DIR)/$(IMG_PREFIX)-zImage
   ifneq ($(CONFIG_TARGET_ROOTFS_INITRAMFS),)
- 	$(CP) $(KDIR)/zImage-initramfs $(BIN_DIR)/openwrt-$(BOARD)-zImage-initramfs
+@@ -26,7 +49,7 @@ define Image/BuildKernel
+ 	$(CP) $(DTS_DIR)/omap3*.dtb $(TARGET_DIR)/boot/
+ 	$(CP) $(DTS_DIR)/omap4*.dtb $(TARGET_DIR)/boot/
   endif
- 
-+	mkimage -A arm -O linux -T kernel -C none \
-+		-a 0x80008000 -e 0x80008000 \
-+		-n 'ARM OpenWrt Linux-$(LINUX_VERSION)' \
-+		-d $(KDIR)/zImage $(BIN_DIR)/$(IMG_PREFIX)-uImage
-+
-+    ifneq ($(CONFIG_TARGET_ROOTFS_INITRAMFS),)
-+	$(CP) $(KDIR)/zImage-initramfs $(BIN_DIR)/$(IMG_PREFIX)-zImage-initramfs
-+	echo -ne '\x00\x00\x00\x00' >> $(BIN_DIR)/$(IMG_PREFIX)-zImage-initramfs
-+	$(call Image/BuildKernel/MkuImage, \
-+		none, 0x80008000, 0x80008000, \
-+		$(BIN_DIR)/$(IMG_PREFIX)-zImage-initramfs, \
-+		$(BIN_DIR)/$(IMG_PREFIX)-uImage-initramfs \
-+	)
-+    endif
-  ifneq ($(CONFIG_TARGET_ROOTFS_INCLUDE_KERNEL),)
- 	$(INSTALL_DIR) $(TARGET_DIR)/boot
- 	$(CP) $(BIN_DIR)/openwrt-$(BOARD)-zImage $(TARGET_DIR)/boot/zImage
-@@ -34,6 +70,7 @@ endef
+-	-mkdir $(BIN_DIR)/dtbs
++	-mkdir -p $(BIN_DIR)/dtbs
+ 	-$(CP) $(DTS_DIR)/am335x*.dtb $(BIN_DIR)/dtbs/
+ 	-$(CP) $(DTS_DIR)/omap3*.dtb $(BIN_DIR)/dtbs/
+ 	-$(CP) $(DTS_DIR)/omap4*.dtb $(BIN_DIR)/dtbs/
+@@ -34,6 +57,7 @@ endef
  
  define Image/Build
  	$(call Image/Build/$(1),$(1))
@@ -137,6 +115,3 @@ index 0000000..976f77a
 +uenvcmd=run loadfdt; run loadimage; run mmcargs;  bootz ${loadaddr} - ${fdtaddr}
 +
 +loadfdt=load mmc ${bootpart} ${fdtaddr} ${fdtdir}/${fdtfile}
--- 
-2.3.3
-

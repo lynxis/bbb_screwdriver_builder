@@ -1,0 +1,13 @@
+Index: openwrt/target/linux/omap/Makefile
+===================================================================
+--- openwrt.orig/target/linux/omap/Makefile	2015-10-10 18:43:46.406076528 +0200
++++ openwrt/target/linux/omap/Makefile	2015-10-10 18:44:27.270897274 +0200
+@@ -9,7 +9,7 @@
+ ARCH:=arm
+ BOARD:=omap
+ BOARDNAME:=TI OMAP3/4/AM33xx
+-FEATURES:=usb usbgadget ext4 targz fpu audio display nand ubifs
++FEATURES:=usb usbgadget ext4 targz fpu audio display nand ubifs usbgadget
+ CPU_TYPE:=cortex-a9
+ CPU_SUBTYPE:=vfpv3
+ 

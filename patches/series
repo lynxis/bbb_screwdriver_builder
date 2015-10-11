@@ -1,4 +1,5 @@
 0001-tools-compile-mtools-and-dosfstools-when-building-om.patch
+0002-target-omap-image-add-sdcard-image-based-on-sunxi.patch
 0003-kernel-spi-add-kernel-package-for-spi-omap-24xx.patch
 0004-package-kernel-add-usb-gadget-ehci-debug-driver.patch
 0005-linux-generic-add-usb-gadget-fix-which-allows-a-smoo.patch
@@ -6,3 +7,10 @@
 0007-FIXUP-usb-dbgp-gadget-Fix-re-connecting-after-USB-di.patch
 0008-FIXUP-usb-serial-gadget-no-TTY-hangup-on-USB-disconn.patch
 0009-another-try-to-fix-musb-iwth-am3xx.patch
+0010-omap-Beagleboard-remove-FEATURES-override.patch
+999-additional-target-omap.patch
+mkfs.patch
+999-add-gadget-support-for-omap.patch
+999-set-password-to-coreboot.patch
+999-set-host-name.patch
+999-set-dhclient.patch

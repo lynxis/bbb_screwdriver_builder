@@ -1,0 +1,16 @@
+Index: openwrt/package/base-files/files/etc/config/network
+===================================================================
+--- openwrt.orig/package/base-files/files/etc/config/network	2015-07-01 18:21:53.132832120 +0200
++++ openwrt/package/base-files/files/etc/config/network	2015-10-11 12:00:55.531614274 +0200
+@@ -9,10 +9,7 @@
+ config interface lan
+ 	option ifname	eth0
+ 	option type 	bridge
+-	option proto	static
+-	option ipaddr	192.168.1.1
+-	option netmask	255.255.255.0
+-	option ip6assign 60
++	option proto	dhcp
+ 
+ config globals globals
+ 	option ula_prefix auto

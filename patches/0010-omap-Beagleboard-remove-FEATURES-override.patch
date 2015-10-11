@@ -1,0 +1,27 @@
+From 3d08dd88e18cb3119ee06bba81795cbd6e56d16a Mon Sep 17 00:00:00 2001
+From: Alexander Couzens <lynxis@fe80.eu>
+Date: Sat, 10 Oct 2015 19:20:48 +0200
+Subject: [PATCH] omap/Beagleboard: remove FEATURES override
+
+It overrides the feature list of the whole target.
+
+Signed-off-by: Alexander Couzens <lynxis@fe80.eu>
+---
+ target/linux/omap/profiles/beagleboard.mk | 1 -
+ 1 file changed, 1 deletion(-)
+
+diff --git a/target/linux/omap/profiles/beagleboard.mk b/target/linux/omap/profiles/beagleboard.mk
+index 4658287..3cf51d4 100644
+--- a/target/linux/omap/profiles/beagleboard.mk
++++ b/target/linux/omap/profiles/beagleboard.mk
+@@ -7,7 +7,6 @@
+ 
+ define Profile/BEAGLEBOARD
+ 	NAME:=EBV BeagleBoard
+-	FEATURES:= usb ext4 targz
+ 	DEFAULT_PACKAGES += kmod-usb2 kmod-usb2-omap \
+ 			kmod-usb-net kmod-usb-net-asix \
+ 			kmod-usb-net-asix-ax88179 kmod-usb-net-hso \
+-- 
+2.5.3
+
