@@ -1,56 +1,73 @@
-# Freifunk Firmware Berlin "Kathleen"
+# BBB screwdriver
 
-*[Kathleen Booth](https://en.wikipedia.org/wiki/Kathleen_Booth) was the author of the first assembly language*.
+A tool for coreboot developers and users.
+The firmware itself is based on vanilla [OpenWRT](https://wiki.openwrt.org/start) Chaos Calmer with some modifications.
+This firmware is mainly intended for beagle bone black (BBB).
 
-The purpose for this release is to have a stable firmware for beginners for the Freifunk mesh in Berlin.
-The firmware itself is based on vanilla [OpenWRT](https://wiki.openwrt.org/start) Barrier Breaker with some modifications (to fix
-broken stuff in OpenWRT itself or for example luci) and additional default packages/configuration settings.
-New features like a new network concept will be part of future releases.
+## Release Note 0.3.0 "screwdriver" - 2015-10-15
 
-## Release Note 0.1.1 "Kathleen" - 2015-xx-xx
-* ...
+* SDCard only release
+* USB debug gadget on USB
+* flashrom support
+* SPI pins are 17/18 21/22 on P9. 1/2 GND, 3/4 VCC 3.3V.
+* based on [OpenWRT](https://wiki.openwrt.org/start) Chaos Calmer release rev r47050
 
-## Features
-* based on [OpenWRT](https://wiki.openwrt.org/start) Barrier Breaker release
-* includes updated OLSRD and BATMAN
-* new OLSR setup and configuration:
-  * SmartGateway for gateway selection (e.g. honors uplink speed)
-  * dynamic gateway plugin for uplink connectivity tests (gwcheck script removed)
-  * freifunk-policyrouting fixed/patched for VPN03 setup
-* new configuration [wizard](https://github.com/freifunk-berlin/packages-berlin/tree/master/utils/luci-app-ffwizard-berlin)
-  * starts after first boot and guides new users through the configuration of the router
-* monitoring of nodes through collectd
-* frei.funk as local DNS entry for your router
-  * you do not have to remember your IP to get access
-* change default lan ip address to 192.168.42.1/24
-  * avoids network collisions
-* one dhcp network for APs and lan (bridged)
-* remove of autoipv6 and use of ULA ipv6 prefixes
-* new primary router target: TP-Link WDR 3500/3600/4300
-* default dns servers:
-  * 85.214.20.141 (FoeBud / Digital Courage)
-  * 213.73.91.35 (CCC Berlin)
-  * 194.150.168.168 (dns.as250.net)
-  * 2001:4ce8::53 (as250)
-  * 2001:910:800::12 (french data network - http://www.fdn.fr/)
+## Known Bugs
+
+* some old bbb won't boot (from sd card)
+
+## Install the screwdriver on your BBB
+
+You have to copy it raw on a sd card. The screwdriver can not (yet) installed on the eMMC.
+Under linux you can use *dd*.
+
+**WARNING If you choose a wrong X you can damage your OS!!!**
+```
+dd if=openwrt-0.3-omap-beagleboneblack-sdcard-vfat-am335x_evm.img of=/dev/sdX
+```
+
+## How to access to screwdriver?
+
+* via network
+* via rs232 **3.3V TTL**
+
+### Connecting via network
+
+* screwdriver provides a dhcp server and is accessable via 192.168.1.1
+* connect network cable
+* username/password root/coreboot
+* ``ssh root@192.168.1.1``
+
+### Connect via RS232 3.3V
+
+* connect a 3.3V serial adapter to pin 1 GND, 4 & 5 data
+* no password required
+
+## How to flash a chip?
+
+* ``flashrom -p linux_spi:dev=/dev/spidev1.0 -r /tmp/foo``
+
+BBB Pin on P9  | Pin on SOIC-8 Chip | Description
+---------------------------------------------
+      1 & 2    |       4            | Ground GND
+      3 & 4    |       8            | VCC 3.3 V
+      17       |       1            | CS ChipSelect
+      18       |       5            | MOSI MasterOutSlaveIn
+      21       |       2            | MISO MasterInSlaveOut
+      22       |       6            | CLK Clock
+
+**VCC is *not* connected in all cases!!! Be sure you don't power the chip from 2 sources, it's a bad idea!**
+
+### How to use the *screwdriver* as USB debug device
+
+cat /dev/ttyGS0 | tee -a /tmp/output
 
 ## Contact / More information
 
-For questions write a mail to <berlin@berlin.freifunk.net> or come to our weekly meetings.
-If you find bugs please report them at: https://github.com/freifunk-berlin/firmware/issues
-
-A tutorial on router configuration is available here (in German only):
-http://berlin.freifunk.net/participate/howto/
+For questions write a mail to <lynxis@fe80.eu> or come to irc channel #coreboot on freenode.
+If you find bugs please report them at: [issues](https://github.com/lynxis/bbb_screwdriver/issues)
 
 ## Development
-
-### Info
-
-For the Berlin Freifunk firmware we use vanilla OpenWRT with additional patches
-and packages. The Makefile automates firmware
-creation and apply patches / integrates custom freifunk packages. All custom
-patches are located in *patches/* and all additional packages can be found at
-http://github.com/freifunk-berlin/packages_berlin.
 
 ### Build Prerequisites
 
@@ -64,14 +81,17 @@ apt-get install git subversion build-essential libncurses5-dev zlib1g-dev gawk \
   unzip libxml-perl flex wget gawk libncurses5-dev gettext quilt python
 ```
 
-### Building all firmwares
+### Building BBB screwdriver
 
 To get the source and build the firmware locally use:
 
 ```
-git clone https://github.com/freifunk-berlin/firmware.git
+git clone https://github.com/lynxis/bbb_screwdriver_builder
 cd firmware
-make
+make -j4
+# -j4 means it builds with 4 threads at the same time. depends how many cores and threads your machine has.
+ls openwrt/bin/omap/openwrt-0.3-omap-beagleboneblack-sdcard-vfat-am335x_evm.img
+# final image
 ```
 
 The build will take some time. You can improve the build time with
@@ -90,61 +110,24 @@ in `firmwares`. The layout looks like the following:
 
 ```
 firmwares/
-    TARGET/
+    omap/
         OpenWrt-ImageBuilder-....tar.bz2
-        backbone/
-           images..
         default/
            images..
         packages/
            base/
            luci/
            packages/
-           packages_berlin/
            routing/
 ```
 
 As you notice there are two different versions:
 
-* `default`: berlin freifunk firmware
-* `backbone`: like default but without wizard and with some additional debug programs
-
-These different *packages lists* are defined in `packages/`.
-
-`make` will use by default `TARGET` and `PACKAGES_LIST_DEFAULT` defined in
-`config.mk`. You can customize this by overriding them:
-
-```
-make TARGET=mpc85xx PACKAGES_LIST_DEFAULT=backbone
-```
-
-The default target is `ar71xx`. At the moment we support the following targets:
-
-* ar71xx
-* ar71xx_mikrotik
-* mpc85xx
-* x86
-
-You can find configs for these targets in `configs/`.
-
-### Continuous integration / Buildbot
-
-The firmware is [built
-automatically](http://buildbot.berlin.freifunk.net/one_line_per_build) by our [buildbot farm](http://buildbot.berlin.freifunk.net/buildslaves). If you have a bit of CPU+RAM+storage capacity on one of your servers, you can provide a buildbot slave (see [berlin-buildbot](https://github.com/freifunk/berlin-buildbot)).
-
-All branches whose name complies to the "X.Y.Z" pattern are built and put into the "stable" downloads directory:
-[http://buildbot.berlin.freifunk.net/buildbot/stable/](http://buildbot.berlin.freifunk.net/buildbot/stable/)
-
-All branches with names not fitting the "X.Y.Z" pattern are built and put into the "unstable" directory:
-[http://buildbot.berlin.freifunk.net/buildbot/unstable/](http://buildbot.berlin.freifunk.net/buildbot/unstable/)
-Note that in the directory there is no reference to the branch name; unstable builds can be identified by build number only.
+* `default`: BBB screwdriver
 
 #### Creating a release
 
-Every release has a [semantic version number](http://semver.org); each major version has its own codename.
-We name our releases after important female computer scientists, hackers, etc.
-For inspiration please take a look at the related
-[ticket](https://github.com/freifunk-berlin/firmware/issues/24).
+Every release has a [semantic version number](http://semver.org);
 
 For a new release, create a new branch. The branch name must be a semantic version
 number. Make sure you change the semantic version number and, for major releases,
@@ -185,10 +168,9 @@ quilt refresh                 # creates/updates the patch file
 
 ### Submitting patches
 
-#### Freifunk Berlin
+#### BBB screwdriver
 
 Please create a pull request for the project you want to submit a patch.
-If you are already member of the Freifunk Berlin team, please delete branches once they have been merged.
 
 #### openwrt
 
