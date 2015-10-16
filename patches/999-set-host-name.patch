@@ -1,0 +1,11 @@
+Index: openwrt/package/base-files/files/etc/config/system
+===================================================================
+--- openwrt.orig/package/base-files/files/etc/config/system	2015-10-17 01:31:19.298361163 +0200
++++ openwrt/package/base-files/files/etc/config/system	2015-10-17 01:54:28.006245902 +0200
+@@ -1,5 +1,5 @@
+ config system
+-	option hostname	OpenWrt
++	option hostname	screwdriver
+ 	option timezone	UTC
+ 
+ config timeserver ntp
