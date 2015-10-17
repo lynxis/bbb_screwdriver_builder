@@ -13,7 +13,7 @@ diff --git a/target/linux/omap/image/Makefile b/target/linux/omap/image/Makefile
 index 3fa2848..0e304d0 100644
 --- a/target/linux/omap/image/Makefile
 +++ b/target/linux/omap/image/Makefile
-@@ -6,10 +6,33 @@
+@@ -6,10 +6,34 @@
  #
  include $(TOPDIR)/rules.mk
  include $(INCLUDE_DIR)/image.mk
@@ -36,6 +36,7 @@ index 3fa2848..0e304d0 100644
 +	mcopy -i $(KDIR)/boot-$(2).img $(BIN_DIR)/openwrt-omap-zImage ::zImage
 +	mcopy -i $(KDIR)/boot-$(2).img $(BIN_DIR)/openwrt-omap-uImage ::uImage
 +	mcopy -i $(KDIR)/boot-$(2).img ./uEnv.txt ::uEnv.txt
++	chmod 755 ./gen_omap_sdcard_img.sh
 +	./gen_omap_sdcard_img.sh \
 +		$(BIN_DIR)/$(IMG_PREFIX)-$(2)-sdcard-vfat-$(1).img \
 +		$(KDIR)/boot-$(2).img \
