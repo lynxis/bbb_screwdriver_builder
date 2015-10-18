@@ -13,4 +13,3 @@
 0032-set-password-to-coreboot.patch
 0040-fix-build-system.patch
 0041-additional-target-omap.patch
-999-add-gadget-support-for-omap.patch
