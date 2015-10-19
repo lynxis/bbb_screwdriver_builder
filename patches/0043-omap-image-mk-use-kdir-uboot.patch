@@ -1,0 +1,42 @@
+Index: openwrt/target/linux/omap/image/Makefile
+===================================================================
+--- openwrt.orig/target/linux/omap/image/Makefile	2015-10-18 06:50:06.349319852 +0200
++++ openwrt/target/linux/omap/image/Makefile	2015-10-19 18:50:13.559804700 +0200
+@@ -19,9 +19,9 @@
+ define Image/Build/SDCard
+ 	rm -f $(KDIR)/boot-$(2).img
+ 	mkdosfs $(KDIR)/boot-$(2).img -C $(FAT32_BLOCKS)
+-	mcopy -i $(KDIR)/boot-$(2).img $(BIN_DIR)/uboot-omap-$(1)/MLO ::MLO
+-	mcopy -i $(KDIR)/boot-$(2).img $(BIN_DIR)/uboot-omap-$(1)/u-boot.img ::u-boot.img
+-	mcopy -i $(KDIR)/boot-$(2).img -s $(BIN_DIR)/dtbs/ ::dtbs
++	mcopy -i $(KDIR)/boot-$(2).img $(KDIR)/uboot-omap-$(1)-MLO ::MLO
++	mcopy -i $(KDIR)/boot-$(2).img $(KDIR)/uboot-omap-$(1)-u-boot.img ::u-boot.img
++	mcopy -i $(KDIR)/boot-$(2).img -s $(KDIR)/dtbs/ ::dtbs
+ 	mcopy -i $(KDIR)/boot-$(2).img $(KDIR)/zImage ::zImage
+ 	mcopy -i $(KDIR)/boot-$(2).img $(KDIR)/uImage ::uImage
+ 	mcopy -i $(KDIR)/boot-$(2).img ./uEnv.txt ::uEnv.txt
+@@ -49,18 +49,16 @@
+ 
+  ifneq ($(CONFIG_TARGET_ROOTFS_INCLUDE_KERNEL),)
+ 	$(INSTALL_DIR) $(TARGET_DIR)/boot
+-	$(CP) $(BIN_DIR)/$(IMG_PREFIX)-zImage $(TARGET_DIR)/boot/zImage
++	$(CP) $(KDIR)/zImage $(TARGET_DIR)/boot/zImage
+  endif
++	-mkdir -p $(KDIR)/dtbs
++	-$(CP) $(DTS_DIR)/am335x*.dtb $(KDIR)/dtbs/
++	-$(CP) $(DTS_DIR)/omap3*.dtb $(KDIR)/dtbs/
++	-$(CP) $(DTS_DIR)/omap4*.dtb $(KDIR)/dtbs/
+  ifneq ($(CONFIG_TARGET_ROOTFS_INCLUDE_DTB),)
+ 	$(INSTALL_DIR) $(TARGET_DIR)/boot
+-	$(CP) $(DTS_DIR)/am335x*.dtb $(TARGET_DIR)/boot/
+-	$(CP) $(DTS_DIR)/omap3*.dtb $(TARGET_DIR)/boot/
+-	$(CP) $(DTS_DIR)/omap4*.dtb $(TARGET_DIR)/boot/
++	$(CP) $(KDIR)/dtbs/* $(TARGET_DIR)/boot/
+  endif
+-	-mkdir -p $(BIN_DIR)/dtbs
+-	-$(CP) $(DTS_DIR)/am335x*.dtb $(BIN_DIR)/dtbs/
+-	-$(CP) $(DTS_DIR)/omap3*.dtb $(BIN_DIR)/dtbs/
+-	-$(CP) $(DTS_DIR)/omap4*.dtb $(BIN_DIR)/dtbs/
+ endef
+ 
+ define Image/Build

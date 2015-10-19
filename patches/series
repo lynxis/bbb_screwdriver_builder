@@ -13,3 +13,5 @@
 0032-set-password-to-coreboot.patch
 0040-fix-build-system.patch
 0041-additional-target-omap.patch
+0042-uboot-omap-install-to-kdir.patch
+0043-omap-image-mk-use-kdir-uboot.patch
