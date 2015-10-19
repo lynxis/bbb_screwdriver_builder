@@ -1,11 +1,56 @@
 -ppp
 -ppp-mod-pppoe
--wpad
 
-# Common
-ip-full
+# editors
+nano
+joe
+vim-full
+vim-runtime
+
+# shell / terminal
+bash
+screen
 tmux
-firewall
+
+# serial
+picocom
+ser2net
+
+# network
+mdns
+ip-full
+lldpd
+tcpdump-mini
+
+flashrom
+
+# kernel modules usb
+kmod-usb2-omap
+kmod-usb-phy-omap-usb2
+kmod-usb-phy-am335x
+kmod-usb-musb-hdrc
+kmod-usb-musb-platformglue
+kmod-usb-ehci-debug-gadget
+kmod-usb-phy-twl4030
+kmod-usb-phy-twl6030
+
+# kernel modules spi
+kmod-spi-dev
+kmod-spi-omap-24xx
+
+# kernel modules for wireless stuff
+wpad
+kmod-ath9k-htc
+kmod-rt2500-usb
+kmod-rt2800-usb
+kmod-rt2x00-usb
+kmod-rt73-usb
+kmod-rtl8187
+kmod-rtl8192cu
+kmod-rtlwifi-usb
+
+# power management ti
+am33x-cm3
 
 # GUI
 # luci-theme-bootstrap
@@ -16,4 +61,3 @@ firewall
 
 # IPv6
 kmod-ipv6
-
