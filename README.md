@@ -65,13 +65,13 @@ cat /dev/ttyGS0 | tee -a /tmp/output
 ## Contact / More information
 
 For questions write a mail to <lynxis@fe80.eu> or come to irc channel #coreboot on freenode.
-If you find bugs please report them at: [issues](https://github.com/lynxis/bbb_screwdriver/issues)
+If you find bugs please report them at: [issues](https://github.com/lynxis/bbb_screwdriver_builder/issues)
 
 ## Development
 
 ### Build Prerequisites
 
-Please take a look at the [openWrt documentation](http://wiki.openwrt.org/doc/howto/buildroot.exigence#examples.of.package.installations)
+Please take a look at the [OpenWrt documentation](http://wiki.openwrt.org/doc/howto/buildroot.exigence#examples.of.package.installations)
 for a complete and uptodate list of packages for your operating system. Make
 sure the list contains `quilt`. We use it for patch management.
 
@@ -90,8 +90,7 @@ git clone https://github.com/lynxis/bbb_screwdriver_builder
 cd firmware
 make -j4
 # -j4 means it builds with 4 threads at the same time. depends how many cores and threads your machine has.
-ls openwrt/bin/omap/openwrt-0.3-omap-beagleboneblack-sdcard-vfat-am335x_evm.img
-# final image
+ls firmwares/omap/default/
 ```
 
 The build will take some time. You can improve the build time with
@@ -133,8 +132,8 @@ For a new release, create a new branch. The branch name must be a semantic versi
 number. Make sure you change the semantic version number and, for major releases,
 the codename in the README and config files (./configs/*)
 
-The buildbot will build the release and place the files in the stable direcotry
-once you pushed the new branch to github.
+Also create a tag for every release.
+
 
 ### Patches with quilt
 
