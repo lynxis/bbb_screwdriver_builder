@@ -14,3 +14,4 @@
 0041-additional-target-omap.patch
 0042-uboot-omap-install-to-kdir.patch
 0043-omap-image-mk-use-kdir-uboot.patch
+0044-banner.patch
