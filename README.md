@@ -14,7 +14,7 @@ This firmware is mainly intended for beagle bone black (BBB).
 
 ## Known Bugs
 
-* some old bbb won't boot (from sd card)
+* some old bbb won't boot (from sd card). Wiping the eMMC fixes this problem.
 
 ## Install the screwdriver on your BBB
 
