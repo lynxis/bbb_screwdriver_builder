@@ -1,20 +1,23 @@
-From e9d359790af1f1a1fcf029a111124f80584fb2b6 Mon Sep 17 00:00:00 2001
+From 789b9b8bbc990e2809daf59630a8948da45671b8 Mon Sep 17 00:00:00 2001
 From: Alexander Couzens <lynxis@fe80.eu>
-Date: Mon, 16 Mar 2015 03:02:48 +0100
-Subject: [PATCH 4/9] package/kernel: add usb gadget ehci debug driver
+Date: Tue, 26 Apr 2016 03:17:25 +0200
+Subject: [PATCH 4/4] add usb gadget ehci debug driver
 
-This gadget driver allow you to debug other devices via EHCI Debug Port capability.
+This gadget driver allow you to debug other devices via EHCI Debug Port
+capability.
+
+Signed-off-by: Alexander Couzens <lynxis@fe80.eu>
 ---
  package/kernel/linux/modules/usb.mk | 17 +++++++++++++++++
  1 file changed, 17 insertions(+)
 
 diff --git a/package/kernel/linux/modules/usb.mk b/package/kernel/linux/modules/usb.mk
-index 74d9e6f..7916bf7 100644
+index 8c5a2ab..7857d44 100644
 --- a/package/kernel/linux/modules/usb.mk
 +++ b/package/kernel/linux/modules/usb.mk
-@@ -307,6 +307,23 @@ endef
+@@ -234,6 +234,23 @@ endef
  
- $(eval $(call KernelPackage,usb-serial-gadget))
+ $(eval $(call KernelPackage,usb-lib-composite))
  
 +define KernelPackage/usb-ehci-debug-gadget
 +  TITLE:=USB EHCI debug port Gadget support
@@ -22,7 +25,7 @@ index 74d9e6f..7916bf7 100644
 +        CONFIG_USB_G_DBGP \
 +	CONFIG_USB_G_DBGP_SERIAL=y \
 +	CONFIG_USB_G_DBGP_PRINTK=n
-+  DEPENDS:=+kmod-usb-gadget +(!LINUX_3_3&&!LINUX_3_6):kmod-usb-lib-composite +kmod-usb-serial-gadget
++  DEPENDS:=+kmod-usb-gadget +kmod-usb-lib-composite +kmod-usb-serial-gadget
 +  FILES:=$(LINUX_DIR)/drivers/usb/gadget/legacy/g_dbgp.ko
 +  AUTOLOAD:=$(call AutoLoad,52,g_dbgp)
 +  $(call AddDepends/usb)
@@ -34,8 +37,8 @@ index 74d9e6f..7916bf7 100644
 +
 +$(eval $(call KernelPackage,usb-ehci-debug-gadget))
  
- define KernelPackage/usb-uhci
-   TITLE:=Support for UHCI controllers
+ define KernelPackage/usb-eth-gadget
+   TITLE:=USB Ethernet Gadget support
 -- 
-2.3.3
+2.8.0
 

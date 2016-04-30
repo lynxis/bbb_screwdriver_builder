@@ -1,0 +1,40 @@
+From 002b7b3d91795bf3c97c0ad029df1e00c42028c4 Mon Sep 17 00:00:00 2001
+From: Alexander Couzens <lynxis@fe80.eu>
+Date: Tue, 26 Apr 2016 03:17:24 +0200
+Subject: [PATCH 3/4] kernel/spi: add kernel package for spi-omap-24xx
+
+spi-omap-24xx can be found in TI based SoC like the beaglebone black
+
+Signed-off-by: Alexander Couzens <lynxis@fe80.eu>
+---
+ package/kernel/linux/modules/spi.mk | 17 +++++++++++++++++
+ 1 file changed, 17 insertions(+)
+
+diff --git a/package/kernel/linux/modules/spi.mk b/package/kernel/linux/modules/spi.mk
+index 1c2a789..1d70138 100644
+--- a/package/kernel/linux/modules/spi.mk
++++ b/package/kernel/linux/modules/spi.mk
+@@ -89,3 +89,20 @@ define KernelPackage/spi-dev/description
+ endef
+ 
+ $(eval $(call KernelPackage,spi-dev))
++
++define KernelPackage/spi-omap-24xx
++  SUBMENU:=$(SPI_MENU)
++  TITLE:=SPI omap 24xx
++  KCONFIG:=CONFIG_SPI_OMAP24XX \
++          CONFIG_SPI=y \
++          CONFIG_SPI_MASTER=y
++  FILES:=$(LINUX_DIR)/drivers/spi/spi-omap2-mcspi.ko
++  AUTOLOAD:=$(call AutoProbe,spi-omap2-mcspi)
++endef
++
++define KernelPackage/spi-dev/description
++ This package contains the user mode SPI device driver
++endef
++
++$(eval $(call KernelPackage,spi-omap-24xx))
++
+-- 
+2.8.0
+

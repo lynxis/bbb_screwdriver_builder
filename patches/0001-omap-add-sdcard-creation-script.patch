@@ -1,3 +1,20 @@
+From c37b7ba983e25719a46c5f00a270c4eda447e0e6 Mon Sep 17 00:00:00 2001
+From: Alexander Couzens <lynxis@fe80.eu>
+Date: Tue, 26 Apr 2016 03:17:22 +0200
+Subject: [PATCH 1/4] omap: add sdcard creation script
+
+Signed-off-by: Alexander Couzens <lynxis@fe80.eu>
+---
+ target/linux/omap/image/Config.in              |  5 ++++
+ target/linux/omap/image/Makefile               | 34 +++++++++++++++++++++++++-
+ target/linux/omap/image/gen_omap_sdcard_img.sh | 33 +++++++++++++++++++++++++
+ target/linux/omap/image/uEnv.txt               |  6 +++++
+ tools/Makefile                                 |  2 +-
+ 5 files changed, 78 insertions(+), 2 deletions(-)
+ create mode 100644 target/linux/omap/image/Config.in
+ create mode 100755 target/linux/omap/image/gen_omap_sdcard_img.sh
+ create mode 100644 target/linux/omap/image/uEnv.txt
+
 diff --git a/target/linux/omap/image/Config.in b/target/linux/omap/image/Config.in
 new file mode 100644
 index 0000000..08b88eb
@@ -10,10 +27,10 @@ index 0000000..08b88eb
 +	default 20
 +
 diff --git a/target/linux/omap/image/Makefile b/target/linux/omap/image/Makefile
-index 3fa2848..0e304d0 100644
+index 3fa2848..10b07a7 100644
 --- a/target/linux/omap/image/Makefile
 +++ b/target/linux/omap/image/Makefile
-@@ -6,10 +6,34 @@
+@@ -6,12 +6,43 @@
  #
  include $(TOPDIR)/rules.mk
  include $(INCLUDE_DIR)/image.mk
@@ -33,8 +50,8 @@ index 3fa2848..0e304d0 100644
 +	mcopy -i $(KDIR)/boot-$(2).img $(BIN_DIR)/uboot-omap-$(1)/MLO ::MLO
 +	mcopy -i $(KDIR)/boot-$(2).img $(BIN_DIR)/uboot-omap-$(1)/u-boot.img ::u-boot.img
 +	mcopy -i $(KDIR)/boot-$(2).img -s $(BIN_DIR)/dtbs/ ::dtbs
-+	mcopy -i $(KDIR)/boot-$(2).img $(BIN_DIR)/openwrt-omap-zImage ::zImage
-+	mcopy -i $(KDIR)/boot-$(2).img $(BIN_DIR)/openwrt-omap-uImage ::uImage
++	mcopy -i $(KDIR)/boot-$(2).img $(KDIR)/zImage ::zImage
++	mcopy -i $(KDIR)/boot-$(2).img $(KDIR)/uImage ::uImage
 +	mcopy -i $(KDIR)/boot-$(2).img ./uEnv.txt ::uEnv.txt
 +	chmod 755 ./gen_omap_sdcard_img.sh
 +	./gen_omap_sdcard_img.sh \
@@ -46,9 +63,18 @@ index 3fa2848..0e304d0 100644
 +endef
 +
  define Image/BuildKernel
++	mkimage -A arm -O linux -T kernel -C none \
++		-a 0x40008000 -e 0x40008000 \
++		-n 'ARM OpenWrt Linux-$(LINUX_VERSION)' \
++		-d $(KDIR)/zImage $(KDIR)/uImage
++
  	$(CP) $(KDIR)/zImage $(BIN_DIR)/$(IMG_PREFIX)-zImage
++	$(CP) $(KDIR)/uImage $(BIN_DIR)/$(IMG_PREFIX)-uImage
++
   ifneq ($(CONFIG_TARGET_ROOTFS_INITRAMFS),)
-@@ -26,7 +49,7 @@ define Image/BuildKernel
+ 	$(CP) $(KDIR)/zImage-initramfs $(BIN_DIR)/$(IMG_PREFIX)-zImage-initramfs
+  endif
+@@ -26,7 +57,7 @@ define Image/BuildKernel
  	$(CP) $(DTS_DIR)/omap3*.dtb $(TARGET_DIR)/boot/
  	$(CP) $(DTS_DIR)/omap4*.dtb $(TARGET_DIR)/boot/
   endif
@@ -57,7 +83,7 @@ index 3fa2848..0e304d0 100644
  	-$(CP) $(DTS_DIR)/am335x*.dtb $(BIN_DIR)/dtbs/
  	-$(CP) $(DTS_DIR)/omap3*.dtb $(BIN_DIR)/dtbs/
  	-$(CP) $(DTS_DIR)/omap4*.dtb $(BIN_DIR)/dtbs/
-@@ -34,6 +57,7 @@ endef
+@@ -34,6 +65,7 @@ endef
  
  define Image/Build
  	$(call Image/Build/$(1),$(1))
@@ -106,13 +132,29 @@ index 0000000..c2f2aad
 +dd bs=512 if="$ROOTFS" of="$OUTPUT" seek="$ROOTFSOFFSET" conv=notrunc
 diff --git a/target/linux/omap/image/uEnv.txt b/target/linux/omap/image/uEnv.txt
 new file mode 100644
-index 0000000..976f77a
+index 0000000..9776ab5
 --- /dev/null
 +++ b/target/linux/omap/image/uEnv.txt
 @@ -0,0 +1,6 @@
-+bootpart=0:1
 +bootdir=/
 +fdtdir=/dtbs
-+uenvcmd=run loadfdt; run loadimage; run mmcargs;  bootz ${loadaddr} - ${fdtaddr}
++uenvcmd=setenv bootpart ${mmcdev}:1 ; run loadfdt; run loadimage; run mmcargs;  bootz ${loadaddr} - ${fdtaddr}
++mmcargs=setenv bootargs console=${console} root=/dev/mmcblk0p2 rootdelay=10
 +
 +loadfdt=load mmc ${bootpart} ${fdtaddr} ${fdtdir}/${fdtfile}
+diff --git a/tools/Makefile b/tools/Makefile
+index 187655e..85a7124 100644
+--- a/tools/Makefile
++++ b/tools/Makefile
+@@ -36,7 +36,7 @@ tools-$(CONFIG_TARGET_orion_generic) += wrt350nv2-builder upslug2
+ tools-$(CONFIG_powerpc) += upx
+ tools-$(CONFIG_TARGET_x86) += qemu
+ tools-$(CONFIG_TARGET_mxs) += elftosb sdimage
+-tools-$(CONFIG_TARGET_brcm2708)$(CONFIG_TARGET_sunxi)$(CONFIG_TARGET_mxs) += mtools dosfstools
++tools-$(CONFIG_TARGET_brcm2708)$(CONFIG_TARGET_omap)$(CONFIG_TARGET_sunxi)$(CONFIG_TARGET_mxs) += mtools dosfstools
+ tools-$(CONFIG_TARGET_ar71xx) += lzma-old squashfs
+ tools-y += lzma squashfs4
+ tools-$(BUILD_B43_TOOLS) += b43-tools
+-- 
+2.8.0
+

@@ -1,0 +1,26 @@
+From 5573d71836da38b0159f595589e1d5e43bc5cd96 Mon Sep 17 00:00:00 2001
+From: Alexander Couzens <lynxis@fe80.eu>
+Date: Tue, 26 Apr 2016 03:17:23 +0200
+Subject: [PATCH 2/4] omap: switch to 4.4
+
+Signed-off-by: Alexander Couzens <lynxis@fe80.eu>
+---
+ target/linux/omap/Makefile | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/target/linux/omap/Makefile b/target/linux/omap/Makefile
+index 20f7517..d7054e9 100644
+--- a/target/linux/omap/Makefile
++++ b/target/linux/omap/Makefile
+@@ -13,7 +13,7 @@ FEATURES:=usb usbgadget ext4 targz fpu audio display nand ubifs
+ CPU_TYPE:=cortex-a9
+ CPU_SUBTYPE:=vfpv3
+ 
+-KERNEL_PATCHVER:=3.18
++KERNEL_PATCHVER:=4.4
+ 
+ MAINTAINER:=Imre Kaloz <kaloz@openwrt.org>
+ 
+-- 
+2.8.0
+
