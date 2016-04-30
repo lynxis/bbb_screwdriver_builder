@@ -8,10 +8,10 @@ Subject: [PATCH 7/9] FIXUP
  ...998-usb-dbgp-gadget-Fix-re-connecting-after-USB-disconne.patch | 8 ++++----
  1 file changed, 4 insertions(+), 4 deletions(-)
 
-diff --git a/target/linux/generic/patches-3.18/998-usb-dbgp-gadget-Fix-re-connecting-after-USB-disconne.patch b/target/linux/generic/patches-3.18/998-usb-dbgp-gadget-Fix-re-connecting-after-USB-disconne.patch
+diff --git a/target/linux/generic/patches-4.4/998-usb-dbgp-gadget-Fix-re-connecting-after-USB-disconne.patch b/target/linux/generic/patches-4.4/998-usb-dbgp-gadget-Fix-re-connecting-after-USB-disconne.patch
 index bf962e3..9ff4603 100644
---- a/target/linux/generic/patches-3.18/998-usb-dbgp-gadget-Fix-re-connecting-after-USB-disconne.patch
-+++ b/target/linux/generic/patches-3.18/998-usb-dbgp-gadget-Fix-re-connecting-after-USB-disconne.patch
+--- a/target/linux/generic/patches-4.4/998-usb-dbgp-gadget-Fix-re-connecting-after-USB-disconne.patch
++++ b/target/linux/generic/patches-4.4/998-usb-dbgp-gadget-Fix-re-connecting-after-USB-disconne.patch
 @@ -19,13 +19,13 @@ previously returned as GET_DESCRIPTOR DT_DEBUG response.
  
  Signed-off-by: Kyösti Mälkki <kyosti.malkki@gmail.com>

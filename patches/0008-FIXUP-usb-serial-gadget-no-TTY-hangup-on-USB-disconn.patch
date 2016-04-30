@@ -8,10 +8,10 @@ Subject: [PATCH 8/9] FIXUP
  ...999-usb-serial-gadget-no-TTY-hangup-on-USB-disconnect-WI.patch | 8 ++++----
  1 file changed, 4 insertions(+), 4 deletions(-)
 
-diff --git a/target/linux/generic/patches-3.18/999-usb-serial-gadget-no-TTY-hangup-on-USB-disconnect-WI.patch b/target/linux/generic/patches-3.18/999-usb-serial-gadget-no-TTY-hangup-on-USB-disconnect-WI.patch
+diff --git a/target/linux/generic/patches-4.4/999-usb-serial-gadget-no-TTY-hangup-on-USB-disconnect-WI.patch b/target/linux/generic/patches-4.4/999-usb-serial-gadget-no-TTY-hangup-on-USB-disconnect-WI.patch
 index dfb771a..e4d3348 100644
---- a/target/linux/generic/patches-3.18/999-usb-serial-gadget-no-TTY-hangup-on-USB-disconnect-WI.patch
-+++ b/target/linux/generic/patches-3.18/999-usb-serial-gadget-no-TTY-hangup-on-USB-disconnect-WI.patch
+--- a/target/linux/generic/patches-4.4/999-usb-serial-gadget-no-TTY-hangup-on-USB-disconnect-WI.patch
++++ b/target/linux/generic/patches-4.4/999-usb-serial-gadget-no-TTY-hangup-on-USB-disconnect-WI.patch
 @@ -13,13 +13,13 @@ power-cycles or for other reasons resets the USB host controller.
  
  Signed-off-by: Kyösti Mälkki <kyosti.malkki@gmail.com>
