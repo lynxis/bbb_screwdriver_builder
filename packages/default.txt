@@ -59,5 +59,3 @@ am33x-cm3
 # uhttpd-mod-tls
 # px5g
 
-# IPv6
-kmod-ipv6
