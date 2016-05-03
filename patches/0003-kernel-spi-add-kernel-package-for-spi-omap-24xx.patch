@@ -1,4 +1,4 @@
-From 002b7b3d91795bf3c97c0ad029df1e00c42028c4 Mon Sep 17 00:00:00 2001
+From 5b04d9a1bf97da6ea1461fb512980f789642e6af Mon Sep 17 00:00:00 2001
 From: Alexander Couzens <lynxis@fe80.eu>
 Date: Tue, 26 Apr 2016 03:17:24 +0200
 Subject: [PATCH 3/4] kernel/spi: add kernel package for spi-omap-24xx

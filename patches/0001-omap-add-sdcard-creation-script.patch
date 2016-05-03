@@ -1,4 +1,4 @@
-From c37b7ba983e25719a46c5f00a270c4eda447e0e6 Mon Sep 17 00:00:00 2001
+From 40a3e55c3c1e08328bdfd2c79c0a27f54240fb70 Mon Sep 17 00:00:00 2001
 From: Alexander Couzens <lynxis@fe80.eu>
 Date: Tue, 26 Apr 2016 03:17:22 +0200
 Subject: [PATCH 1/4] omap: add sdcard creation script

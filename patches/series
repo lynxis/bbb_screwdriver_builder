@@ -2,7 +2,9 @@
 0002-omap-switch-to-4.4.patch
 0003-kernel-spi-add-kernel-package-for-spi-omap-24xx.patch
 0004-add-usb-gadget-ehci-debug-driver.patch
+0005-omap-add-missing-symbol-CONFIG_CHARGER_TPS65217.patch
 0006-omap-enable-spi-on-beaglebone-black-as-spidev.patch
+0007-omap-boot-dir-to-hold-bootloader-somewhere.patch
 0009-another-try-to-fix-musb-iwth-am3xx.patch
 0031-set-host-name.patch
 0032-set-password-to-coreboot.patch

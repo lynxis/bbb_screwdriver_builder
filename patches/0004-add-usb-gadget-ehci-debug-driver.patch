@@ -1,4 +1,4 @@
-From 789b9b8bbc990e2809daf59630a8948da45671b8 Mon Sep 17 00:00:00 2001
+From dc1489ff32142d704192a304e09d06494659ea53 Mon Sep 17 00:00:00 2001
 From: Alexander Couzens <lynxis@fe80.eu>
 Date: Tue, 26 Apr 2016 03:17:25 +0200
 Subject: [PATCH 4/4] add usb gadget ehci debug driver

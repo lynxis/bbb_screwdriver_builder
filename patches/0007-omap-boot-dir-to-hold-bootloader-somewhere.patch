@@ -1,0 +1,92 @@
+From 8e0b273158a7bc44e1a7e9396b95b584826a555b Mon Sep 17 00:00:00 2001
+From: Alexander Couzens <lynxis@fe80.eu>
+Date: Sun, 1 May 2016 07:55:12 +0200
+Subject: [PATCH 2/2] omap: boot dir to hold bootloader somewhere
+
+---
+ include/image.mk                 | 3 +++
+ package/boot/uboot-omap/Makefile | 4 ++++
+ target/imagebuilder/Makefile     | 4 ++++
+ target/linux/omap/image/Makefile | 4 ++--
+ 4 files changed, 13 insertions(+), 2 deletions(-)
+
+diff --git a/include/image.mk b/include/image.mk
+index 7c11aa1..06ea317 100644
+--- a/include/image.mk
++++ b/include/image.mk
+@@ -14,6 +14,9 @@ include $(INCLUDE_DIR)/version.mk
+ override MAKE:=$(_SINGLE)$(SUBMAKE)
+ override NO_TRACE_MAKE:=$(_SINGLE)$(NO_TRACE_MAKE)
+ 
++# BOOT DIR for bootloaders. place all binary files in there
++BOOT_DIR=$(BUILD_DIR)/bootloaders
++
+ KDIR=$(KERNEL_BUILD_DIR)
+ KDIR_TMP=$(KDIR)/tmp
+ DTS_DIR:=$(LINUX_DIR)/arch/$(LINUX_KARCH)/boot/dts
+diff --git a/package/boot/uboot-omap/Makefile b/package/boot/uboot-omap/Makefile
+index 5441baf..3a2c898 100644
+--- a/package/boot/uboot-omap/Makefile
++++ b/package/boot/uboot-omap/Makefile
+@@ -6,6 +6,7 @@
+ #
+ 
+ include $(TOPDIR)/rules.mk
++include $(INCLUDE_DIR)/image.mk
+ 
+ PKG_NAME:=u-boot
+ PKG_VERSION:=2015.10
+@@ -85,6 +86,9 @@ define Package/uboot/install/default
+ 	$(INSTALL_DIR) $(BIN_DIR)/uboot-$(BOARD)-$(1)
+ 	$(CP) $(PKG_BUILD_DIR)/u-boot.img $(BIN_DIR)/uboot-$(BOARD)-$(1)/u-boot.img
+ 	$(CP) $(PKG_BUILD_DIR)/MLO $(BIN_DIR)/uboot-$(BOARD)-$(1)/MLO
++	$(INSTALL_DIR) $(BOOT_DIR)/uboot-$(BOARD)-$(1)
++	$(CP) $(PKG_BUILD_DIR)/u-boot.img $(BOOT_DIR)/uboot-$(BOARD)-$(1)/u-boot.img
++	$(CP) $(PKG_BUILD_DIR)/MLO $(BOOT_DIR)/uboot-$(BOARD)-$(1)/MLO
+ endef
+ 
+ define Package/uboot/install/template
+diff --git a/target/imagebuilder/Makefile b/target/imagebuilder/Makefile
+index 106ca3d..a97c50f 100644
+--- a/target/imagebuilder/Makefile
++++ b/target/imagebuilder/Makefile
+@@ -11,10 +11,13 @@ include $(INCLUDE_DIR)/host.mk
+ include $(INCLUDE_DIR)/version.mk
+ include $(INCLUDE_DIR)/feeds.mk
+ 
++BOOT_DIR=$(BUILD_DIR)/bootloaders
++
+ override MAKEFLAGS=
+ 
+ IB_NAME:=$(VERSION_DIST)-ImageBuilder-$(if $(CONFIG_VERSION_FILENAMES),$(VERSION_NUMBER)-)$(BOARD)$(if $(SUBTARGET),-$(SUBTARGET)).$(HOST_OS)-$(HOST_ARCH)
+ PKG_BUILD_DIR:=$(BUILD_DIR)/$(IB_NAME)
++IB_BOOT_DIR:=$(patsubst $(TOPDIR)/%,$(PKG_BUILD_DIR)/%,$(BOOT_DIR))
+ IB_KDIR:=$(patsubst $(TOPDIR)/%,$(PKG_BUILD_DIR)/%,$(KERNEL_BUILD_DIR))
+ IB_LDIR:=$(patsubst $(TOPDIR)/%,$(PKG_BUILD_DIR)/%,$(LINUX_DIR))
+ IB_DTSDIR:=$(patsubst $(TOPDIR)/%,$(PKG_BUILD_DIR)/%,$(LINUX_DIR))/arch/$(ARCH)/boot/dts/
+@@ -63,6 +66,7 @@ endif
+ 	rm -rf \
+ 		$(PKG_BUILD_DIR)/target/linux/*/files{,-*} \
+ 		$(PKG_BUILD_DIR)/target/linux/*/patches{,-*}
++	-cp -a $(BOOT_DIR)/ $(IB_BOOT_DIR)/
+ 	-cp $(KERNEL_BUILD_DIR)/* $(IB_KDIR)/ # don't copy subdirectories here
+ 	-cp $(LINUX_DIR)/.config $(IB_LDIR)/
+ 	-$(SCRIPT_DIR)/bundle-libraries.sh $(IB_LDIR)/scripts/dtc \
+diff --git a/target/linux/omap/image/Makefile b/target/linux/omap/image/Makefile
+index 10b07a7..e06def9 100644
+--- a/target/linux/omap/image/Makefile
++++ b/target/linux/omap/image/Makefile
+@@ -19,8 +19,8 @@ UBI_OPTS = -m 2048 -p 128KiB -s 512 -O 2048
+ define Image/Build/SDCard
+ 	rm -f $(KDIR)/boot-$(2).img
+ 	mkdosfs $(KDIR)/boot-$(2).img -C $(FAT32_BLOCKS)
+-	mcopy -i $(KDIR)/boot-$(2).img $(BIN_DIR)/uboot-omap-$(1)/MLO ::MLO
+-	mcopy -i $(KDIR)/boot-$(2).img $(BIN_DIR)/uboot-omap-$(1)/u-boot.img ::u-boot.img
++	mcopy -i $(KDIR)/boot-$(2).img $(BOOT_DIR)/uboot-omap-$(1)/MLO ::MLO
++	mcopy -i $(KDIR)/boot-$(2).img $(BOOT_DIR)/uboot-omap-$(1)/u-boot.img ::u-boot.img
+ 	mcopy -i $(KDIR)/boot-$(2).img -s $(BIN_DIR)/dtbs/ ::dtbs
+ 	mcopy -i $(KDIR)/boot-$(2).img $(KDIR)/zImage ::zImage
+ 	mcopy -i $(KDIR)/boot-$(2).img $(KDIR)/uImage ::uImage
+-- 
+2.8.0
+

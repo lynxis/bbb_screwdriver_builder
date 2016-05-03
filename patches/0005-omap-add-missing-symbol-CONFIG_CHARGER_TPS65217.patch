@@ -1,0 +1,24 @@
+From 48c378f530756df1529ee822e450a94d51d3f55c Mon Sep 17 00:00:00 2001
+From: Alexander Couzens <lynxis@fe80.eu>
+Date: Sun, 1 May 2016 07:53:02 +0200
+Subject: [PATCH 1/2] omap: add missing symbol CONFIG_CHARGER_TPS65217
+
+---
+ target/linux/omap/config-4.4 | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/target/linux/omap/config-4.4 b/target/linux/omap/config-4.4
+index 5d4f6f5..ae19667 100644
+--- a/target/linux/omap/config-4.4
++++ b/target/linux/omap/config-4.4
+@@ -57,6 +57,7 @@ CONFIG_BACKLIGHT_PWM=y
+ CONFIG_BCH=y
+ CONFIG_BOUNCE=y
+ CONFIG_CACHE_L2X0=y
++# CONFIG_CHARGER_TPS65217 is not set
+ CONFIG_CLKDEV_LOOKUP=y
+ CONFIG_CLKSRC_MMIO=y
+ CONFIG_CLKSRC_OF=y
+-- 
+2.8.0
+
