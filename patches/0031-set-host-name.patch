@@ -1,11 +1,11 @@
-Index: openwrt/package/base-files/files/etc/config/system
+Index: lede/package/base-files/files/etc/config/system
 ===================================================================
---- openwrt.orig/package/base-files/files/etc/config/system	2015-10-17 01:31:19.298361163 +0200
-+++ openwrt/package/base-files/files/etc/config/system	2015-10-17 01:54:28.006245902 +0200
+--- lede.orig/package/base-files/files/etc/config/system	2016-05-30 00:49:04.378541545 +0200
++++ lede/package/base-files/files/etc/config/system	2016-05-30 00:49:40.867274745 +0200
 @@ -1,5 +1,5 @@
  config system
--	option hostname	OpenWrt
+-	option hostname	lede
 +	option hostname	screwdriver
  	option timezone	UTC
+ 	option ttylogin	0
  
- config timeserver ntp
