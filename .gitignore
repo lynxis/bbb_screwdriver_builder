@@ -2,5 +2,5 @@
 .stamp*
 patches/*~
 bin
-openwrt
+lede
 firmwares

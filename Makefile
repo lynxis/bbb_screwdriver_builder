@@ -94,7 +94,7 @@ firmwares: stamp-clean-firmwares .stamp-firmwares
 	rm -rf $(IB_BUILD_DIR)
 	mkdir -p $(IB_BUILD_DIR)
 	$(eval TOOLCHAIN_PATH := $(shell printf "%s:" $(LEDE_DIR)/staging_dir/toolchain-*/bin))
-	$(eval IB_FILE := $(shell ls $(LEDE_DIR)/bin/$(MAINTARGET)/LEDE-imagebuilder*.tar.bz2))
+	$(eval IB_FILE := $(shell ls $(LEDE_DIR)/bin/targets/$(MAINTARGET)/$(SUBTARGET)/*-imagebuilder*.tar.bz2))
 	$(eval IB_DIR := $(shell basename $(IB_FILE) .tar.bz2))
 	cd $(IB_BUILD_DIR); tar xf $(IB_FILE)
 	export PATH=$(PATH):$(TOOLCHAIN_PATH); \
@@ -123,11 +123,12 @@ firmwares: stamp-clean-firmwares .stamp-firmwares
 	  mv $$DIR_ABS $$TARGET_DIR; \
 	done;
 	# copy imagebuilder, sdk and toolchain (if existing)
-	cp -a $(LEDE_DIR)/bin/$(MAINTARGET)/lede-*.tar.bz2 $(FW_TARGET_DIR)/
+	cp -a $(LEDE_DIR)/bin/targets/$(MAINTARGET)/$(SUBTARGET)/*.tar.bz2 $(FW_TARGET_DIR)/
 	# copy packages
 	PACKAGES_DIR="$(FW_TARGET_DIR)/packages"; \
 	rm -rf $$PACKAGES_DIR; \
-	cp -a $(LEDE_DIR)/bin/$(MAINTARGET)/packages $$PACKAGES_DIR
+	cp -a $(LEDE_DIR)/bin/targets/$(MAINTARGET)/$(SUBTARGET)/packages $$PACKAGES_DIR
+	# TODO: missing /bin/packages/
 	rm -rf $(IB_BUILD_DIR)
 	touch $@
 
