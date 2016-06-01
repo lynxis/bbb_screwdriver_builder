@@ -3,3 +3,5 @@
 0007-omap-boot-dir-to-hold-bootloader-somewhere.patch
 0009-another-try-to-fix-musb-iwth-am3xx.patch
 0032-set-password-to-coreboot.patch
+0033-misc-Beaglebone-capemanager.patch
+0034-enable-capemgr.patch
