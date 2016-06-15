@@ -49,6 +49,9 @@ kmod-rtl8187
 kmod-rtl8192cu
 kmod-rtlwifi-usb
 
+lava-tool
+lava-dispatcher
+
 # power management ti
 am33x-cm3
 
