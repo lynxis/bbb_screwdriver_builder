@@ -142,19 +142,3 @@ index 0000000..9776ab5
 +mmcargs=setenv bootargs console=${console} root=/dev/mmcblk0p2 rootdelay=10
 +
 +loadfdt=load mmc ${bootpart} ${fdtaddr} ${fdtdir}/${fdtfile}
-diff --git a/tools/Makefile b/tools/Makefile
-index 187655e..85a7124 100644
---- a/tools/Makefile
-+++ b/tools/Makefile
-@@ -36,7 +36,7 @@ tools-$(CONFIG_TARGET_orion_generic) += wrt350nv2-builder upslug2
- tools-$(CONFIG_powerpc) += upx
- tools-$(CONFIG_TARGET_x86) += qemu
- tools-$(CONFIG_TARGET_mxs) += elftosb sdimage
--tools-$(CONFIG_TARGET_brcm2708)$(CONFIG_TARGET_sunxi)$(CONFIG_TARGET_mxs) += mtools dosfstools
-+tools-$(CONFIG_TARGET_brcm2708)$(CONFIG_TARGET_omap)$(CONFIG_TARGET_sunxi)$(CONFIG_TARGET_mxs) += mtools dosfstools
- tools-$(CONFIG_TARGET_ar71xx) += lzma-old squashfs
- tools-y += lzma squashfs4
- tools-$(BUILD_B43_TOOLS) += b43-tools
--- 
-2.8.0
-
