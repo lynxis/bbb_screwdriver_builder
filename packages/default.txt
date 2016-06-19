@@ -49,6 +49,7 @@ kmod-rtl8187
 kmod-rtl8192cu
 kmod-rtlwifi-usb
 
+openvpn-polarssl
 lava-tool
 lava-dispatcher
 
