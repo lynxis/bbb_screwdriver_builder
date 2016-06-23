@@ -32,23 +32,67 @@ Index: lede/target/linux/omap/patches-4.4/110-arm-dts-Enable-beaglebone-cape-man
 ===================================================================
 --- /dev/null
 +++ lede/target/linux/omap/patches-4.4/110-arm-dts-Enable-beaglebone-cape-manager.patch
-@@ -0,0 +1,48 @@
-+From b3ecfd19acf89465ea4141d965f33519da13a0fe Mon Sep 17 00:00:00 2001
-+From: Robert Nelson <robertcnelson@gmail.com>
-+Date: Tue, 15 Mar 2016 16:15:47 -0500
-+Subject: [PATCH] arm: dts: Enable beaglebone cape-manager
-+
-+Enable the cape manager on the beaglebone family of boards.
-+
-+Signed-off-by: Pantelis Antoniou <pantelis.antoniou@konsulko.com>
-+---
-+ arch/arm/boot/dts/am335x-bone-common.dtsi | 25 +++++++++++++++++++++++++
-+ 1 file changed, 25 insertions(+)
-+
+@@ -0,0 +1,89 @@
 +diff --git a/arch/arm/boot/dts/am335x-bone-common.dtsi b/arch/arm/boot/dts/am335x-bone-common.dtsi
 +index cb4e33d..8e69224 100644
 +--- a/arch/arm/boot/dts/am335x-bone-common.dtsi
 ++++ b/arch/arm/boot/dts/am335x-bone-common.dtsi
++@@ -242,6 +242,55 @@
++ 	};
++ };
++ 
+++&i2c2 {
+++	pinctrl-names = "default";
+++	pinctrl-0 = <&i2c2_pins>;
+++
+++	status = "okay";
+++	clock-frequency = <100000>;
+++
+++	cape_eeprom0: cape_eeprom0@54 {
+++		compatible = "at,24c256";
+++		reg = <0x54>;
+++		#address-cells = <1>;
+++		#size-cells = <1>;
+++		cape0_data: cape_data@0 {
+++			reg = <0 0x100>;
+++		};
+++	};
+++
+++	cape_eeprom1: cape_eeprom1@55 {
+++		compatible = "at,24c256";
+++		reg = <0x55>;
+++		#address-cells = <1>;
+++		#size-cells = <1>;
+++		cape1_data: cape_data@0 {
+++			reg = <0 0x100>;
+++		};
+++	};
+++
+++	cape_eeprom2: cape_eeprom2@56 {
+++		compatible = "at,24c256";
+++		reg = <0x56>;
+++		#address-cells = <1>;
+++		#size-cells = <1>;
+++		cape2_data: cape_data@0 {
+++			reg = <0 0x100>;
+++		};
+++	};
+++
+++	cape_eeprom3: cape_eeprom3@57 {
+++		compatible = "at,24c256";
+++		reg = <0x57>;
+++		#address-cells = <1>;
+++		#size-cells = <1>;
+++		cape3_data: cape_data@0 {
+++			reg = <0 0x100>;
+++		};
+++	};
+++};
+++
+++
++ /include/ "tps65217.dtsi"
++ 
++ &tps {
 +@@ -411,3 +411,28 @@
 + &rtc {
 + 	system-power-controller;
@@ -78,6 +122,3 @@ Index: lede/target/linux/omap/patches-4.4/110-arm-dts-Enable-beaglebone-cape-man
 ++		};
 ++	};
 ++};
-+-- 
-+2.8.3
-+
