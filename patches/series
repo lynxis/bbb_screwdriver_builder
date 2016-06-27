@@ -4,3 +4,4 @@
 0032-set-password-to-coreboot.patch
 0033-misc-Beaglebone-capemanager.patch
 0034-enable-capemgr.patch
+0035-compile-cape-mgr-as-module.patch
