@@ -27,3 +27,15 @@ Index: lede/target/linux/omap/modules.mk
 +
 +$(eval $(call KernelPackage,cape-manager))
 +
+Index: lede/target/linux/omap/config-4.4
+===================================================================
+--- lede.orig/target/linux/omap/config-4.4
++++ lede/target/linux/omap/config-4.4
+@@ -69,7 +69,6 @@ CONFIG_BLK_DEV_RAM=y
+ CONFIG_BLK_DEV_RAM_COUNT=16
+ CONFIG_BLK_DEV_RAM_SIZE=16384
+ CONFIG_BLK_DEV_SD=y
+-CONFIG_BONE_CAPEMGR=y
+ CONFIG_BOUNCE=y
+ CONFIG_BSD_PROCESS_ACCT=y
+ CONFIG_BUILD_BIN2C=y
