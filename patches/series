@@ -5,3 +5,4 @@
 0033-misc-Beaglebone-capemanager.patch
 0034-enable-capemgr.patch
 0035-compile-cape-mgr-as-module.patch
+0036-enable-nvmem.patch
