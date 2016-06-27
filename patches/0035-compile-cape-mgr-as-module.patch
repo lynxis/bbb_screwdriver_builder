@@ -18,7 +18,7 @@ Index: lede/target/linux/omap/modules.mk
 +  	CONFIG_BONE_CAPEMGR
 +  FILES:=\
 +  	$(LINUX_DIR)/drivers/misc/bone_capemgr.ko
-+  AUTOLOAD:=$(call AutoProbe,99,bone_capemgr)
++  AUTOLOAD:=$(call AutoProbe,bone_capemgr)
 +endef
 +
 +define KernelPackage/cape-manager/description
