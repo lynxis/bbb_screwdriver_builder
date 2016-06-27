@@ -56,6 +56,7 @@ lava-dispatcher
 # power management ti
 am33x-cm3
 kmod-eeprom-at24
+kmod-cape-manager
 
 # GUI
 # luci-theme-bootstrap
