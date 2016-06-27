@@ -1,0 +1,35 @@
+Index: lede/target/linux/omap/patches-4.4/120-debug-cape.patch
+===================================================================
+--- /dev/null
++++ lede/target/linux/omap/patches-4.4/120-debug-cape.patch
+@@ -0,0 +1,30 @@
++Index: linux-4.4.13/drivers/misc/bone_capemgr.c
++===================================================================
++--- linux-4.4.13.orig/drivers/misc/bone_capemgr.c
+++++ linux-4.4.13/drivers/misc/bone_capemgr.c
++@@ -1634,6 +1634,7 @@ capemgr_probe(struct platform_device *pd
++ 		ret = -ENODEV;
++ 		goto err_exit;
++ 	}
+++	dev_err(&pdev->dev, "Found baseboardmaps'\n");
++ 
++ 	bbrd->nvmem_cell = nvmem_cell_get(&pdev->dev, "baseboard");
++ 	if (IS_ERR(bbrd->nvmem_cell)) {
++@@ -1643,14 +1644,16 @@ capemgr_probe(struct platform_device *pd
++ 		bbrd->nvmem_cell = NULL;
++ 		goto err_exit;
++ 	}
+++	dev_err(&pdev->dev, "Found nvmem_cell'\n");
++ 
++ 	ret = bone_baseboard_scan(bbrd);
++ 	if (ret != 0) {
++ 		dev_err(&pdev->dev, "Failed to scan baseboard eeprom\n");
++ 		goto err_exit;
++ 	}
+++	dev_err(&pdev->dev, "Success bone_baseboard_scan'\n");
++ 
++-	dev_info(&pdev->dev, "Baseboard: '%s'\n", bbrd->text_id);
+++	dev_warn(&pdev->dev, "Baseboard: '%s'\n", bbrd->text_id);
++ 
++ 	board_name = NULL;
++ 	compatible_name = NULL;
