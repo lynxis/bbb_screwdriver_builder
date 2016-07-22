@@ -1,0 +1,814 @@
+Index: lede/target/linux/omap/patches-4.4/0001-misc-eeprom-use-kobj_to_dev.patch
+===================================================================
+--- /dev/null
++++ lede/target/linux/omap/patches-4.4/0001-misc-eeprom-use-kobj_to_dev.patch
+@@ -0,0 +1,98 @@
++From 092462c2b52259edba80a6748acb3305f7f70423 Mon Sep 17 00:00:00 2001
++From: Geliang Tang <geliangtang@163.com>
++Date: Wed, 13 Jan 2016 23:30:11 +0800
++Subject: [PATCH] misc: eeprom: use kobj_to_dev()
++
++Use kobj_to_dev() instead of open-coding it.
++
++Signed-off-by: Geliang Tang <geliangtang@163.com>
++Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
++---
++ drivers/misc/eeprom/at24.c          | 4 ++--
++ drivers/misc/eeprom/at25.c          | 4 ++--
++ drivers/misc/eeprom/eeprom.c        | 2 +-
++ drivers/misc/eeprom/eeprom_93xx46.c | 4 ++--
++ 4 files changed, 7 insertions(+), 7 deletions(-)
++
++diff --git a/drivers/misc/eeprom/at24.c b/drivers/misc/eeprom/at24.c
++index 5d7c090..d105c25 100644
++--- a/drivers/misc/eeprom/at24.c
+++++ b/drivers/misc/eeprom/at24.c
++@@ -289,7 +289,7 @@ static ssize_t at24_bin_read(struct file *filp, struct kobject *kobj,
++ {
++ 	struct at24_data *at24;
++ 
++-	at24 = dev_get_drvdata(container_of(kobj, struct device, kobj));
+++	at24 = dev_get_drvdata(kobj_to_dev(kobj));
++ 	return at24_read(at24, buf, off, count);
++ }
++ 
++@@ -420,7 +420,7 @@ static ssize_t at24_bin_write(struct file *filp, struct kobject *kobj,
++ {
++ 	struct at24_data *at24;
++ 
++-	at24 = dev_get_drvdata(container_of(kobj, struct device, kobj));
+++	at24 = dev_get_drvdata(kobj_to_dev(kobj));
++ 	return at24_write(at24, buf, off, count);
++ }
++ 
++diff --git a/drivers/misc/eeprom/at25.c b/drivers/misc/eeprom/at25.c
++index f850ef5..3e9e5a2 100644
++--- a/drivers/misc/eeprom/at25.c
+++++ b/drivers/misc/eeprom/at25.c
++@@ -139,7 +139,7 @@ at25_bin_read(struct file *filp, struct kobject *kobj,
++ 	struct device		*dev;
++ 	struct at25_data	*at25;
++ 
++-	dev = container_of(kobj, struct device, kobj);
+++	dev = kobj_to_dev(kobj);
++ 	at25 = dev_get_drvdata(dev);
++ 
++ 	return at25_ee_read(at25, buf, off, count);
++@@ -273,7 +273,7 @@ at25_bin_write(struct file *filp, struct kobject *kobj,
++ 	struct device		*dev;
++ 	struct at25_data	*at25;
++ 
++-	dev = container_of(kobj, struct device, kobj);
+++	dev = kobj_to_dev(kobj);
++ 	at25 = dev_get_drvdata(dev);
++ 
++ 	return at25_ee_write(at25, buf, off, count);
++diff --git a/drivers/misc/eeprom/eeprom.c b/drivers/misc/eeprom/eeprom.c
++index 7342fd6..3d1d551 100644
++--- a/drivers/misc/eeprom/eeprom.c
+++++ b/drivers/misc/eeprom/eeprom.c
++@@ -84,7 +84,7 @@ static ssize_t eeprom_read(struct file *filp, struct kobject *kobj,
++ 			   struct bin_attribute *bin_attr,
++ 			   char *buf, loff_t off, size_t count)
++ {
++-	struct i2c_client *client = to_i2c_client(container_of(kobj, struct device, kobj));
+++	struct i2c_client *client = to_i2c_client(kobj_to_dev(kobj));
++ 	struct eeprom_data *data = i2c_get_clientdata(client);
++ 	u8 slice;
++ 
++diff --git a/drivers/misc/eeprom/eeprom_93xx46.c b/drivers/misc/eeprom/eeprom_93xx46.c
++index ff63f05..473aa0a 100644
++--- a/drivers/misc/eeprom/eeprom_93xx46.c
+++++ b/drivers/misc/eeprom/eeprom_93xx46.c
++@@ -45,7 +45,7 @@ eeprom_93xx46_bin_read(struct file *filp, struct kobject *kobj,
++ 	int bits, ret;
++ 	u16 cmd_addr;
++ 
++-	dev = container_of(kobj, struct device, kobj);
+++	dev = kobj_to_dev(kobj);
++ 	edev = dev_get_drvdata(dev);
++ 
++ 	cmd_addr = OP_READ << edev->addrlen;
++@@ -190,7 +190,7 @@ eeprom_93xx46_bin_write(struct file *filp, struct kobject *kobj,
++ 	struct device *dev;
++ 	int i, ret, step = 1;
++ 
++-	dev = container_of(kobj, struct device, kobj);
+++	dev = kobj_to_dev(kobj);
++ 	edev = dev_get_drvdata(dev);
++ 
++ 	/* only write even number of bytes on 16-bit devices */
++-- 
++2.9.0
++
+Index: lede/target/linux/omap/patches-4.4/0002-eeprom-at24-extend-driver-to-plug-into-the-NVMEM-fra.patch
+===================================================================
+--- /dev/null
++++ lede/target/linux/omap/patches-4.4/0002-eeprom-at24-extend-driver-to-plug-into-the-NVMEM-fra.patch
+@@ -0,0 +1,245 @@
++From 57d155506dd5e8f8242d0310d3822c486f70dea7 Mon Sep 17 00:00:00 2001
++From: Andrew Lunn <andrew@lunn.ch>
++Date: Fri, 26 Feb 2016 20:59:20 +0100
++Subject: [PATCH] eeprom: at24: extend driver to plug into the NVMEM framework
++
++Add a regmap for accessing the EEPROM, and then use that with the
++NVMEM framework. Set the NVMEM config structure to enable backward, so
++that the 'eeprom' file in sys is provided by the framework.
++
++Signed-off-by: Andrew Lunn <andrew@lunn.ch>
++Acked-by: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
++Tested-by: Bartosz Golaszewski <bgolaszewski@baylibre.com>
++Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
++---
++ drivers/misc/eeprom/Kconfig |   2 +
++ drivers/misc/eeprom/at24.c  | 121 +++++++++++++++++++++++++++++---------------
++ 2 files changed, 82 insertions(+), 41 deletions(-)
++
++diff --git a/drivers/misc/eeprom/Kconfig b/drivers/misc/eeprom/Kconfig
++index 04f2e1f..2493547 100644
++--- a/drivers/misc/eeprom/Kconfig
+++++ b/drivers/misc/eeprom/Kconfig
++@@ -3,6 +3,8 @@ menu "EEPROM support"
++ config EEPROM_AT24
++ 	tristate "I2C EEPROMs / RAMs / ROMs from most vendors"
++ 	depends on I2C && SYSFS
+++	select REGMAP
+++	select NVMEM
++ 	help
++ 	  Enable this driver to get read/write support to most I2C EEPROMs
++ 	  and compatible devices like FRAMs, SRAMs, ROMs etc. After you
++diff --git a/drivers/misc/eeprom/at24.c b/drivers/misc/eeprom/at24.c
++index d105c25..f15cda9 100644
++--- a/drivers/misc/eeprom/at24.c
+++++ b/drivers/misc/eeprom/at24.c
++@@ -15,7 +15,6 @@
++ #include <linux/slab.h>
++ #include <linux/delay.h>
++ #include <linux/mutex.h>
++-#include <linux/sysfs.h>
++ #include <linux/mod_devicetable.h>
++ #include <linux/log2.h>
++ #include <linux/bitops.h>
++@@ -23,6 +22,8 @@
++ #include <linux/of.h>
++ #include <linux/acpi.h>
++ #include <linux/i2c.h>
+++#include <linux/nvmem-provider.h>
+++#include <linux/regmap.h>
++ #include <linux/platform_data/at24.h>
++ 
++ /*
++@@ -64,12 +65,15 @@ struct at24_data {
++ 	 * but not from changes by other I2C masters.
++ 	 */
++ 	struct mutex lock;
++-	struct bin_attribute bin;
++ 
++ 	u8 *writebuf;
++ 	unsigned write_max;
++ 	unsigned num_addresses;
++ 
+++	struct regmap_config regmap_config;
+++	struct nvmem_config nvmem_config;
+++	struct nvmem_device *nvmem;
+++
++ 	/*
++ 	 * Some chips tie up multiple I2C addresses; dummy devices reserve
++ 	 * them for us, and we'll use them with SMBus calls.
++@@ -283,17 +287,6 @@ static ssize_t at24_read(struct at24_data *at24,
++ 	return retval;
++ }
++ 
++-static ssize_t at24_bin_read(struct file *filp, struct kobject *kobj,
++-		struct bin_attribute *attr,
++-		char *buf, loff_t off, size_t count)
++-{
++-	struct at24_data *at24;
++-
++-	at24 = dev_get_drvdata(kobj_to_dev(kobj));
++-	return at24_read(at24, buf, off, count);
++-}
++-
++-
++ /*
++  * Note that if the hardware write-protect pin is pulled high, the whole
++  * chip is normally write protected. But there are plenty of product
++@@ -414,16 +407,6 @@ static ssize_t at24_write(struct at24_data *at24, const char *buf, loff_t off,
++ 	return retval;
++ }
++ 
++-static ssize_t at24_bin_write(struct file *filp, struct kobject *kobj,
++-		struct bin_attribute *attr,
++-		char *buf, loff_t off, size_t count)
++-{
++-	struct at24_data *at24;
++-
++-	at24 = dev_get_drvdata(kobj_to_dev(kobj));
++-	return at24_write(at24, buf, off, count);
++-}
++-
++ /*-------------------------------------------------------------------------*/
++ 
++ /*
++@@ -450,6 +433,49 @@ static ssize_t at24_macc_write(struct memory_accessor *macc, const char *buf,
++ 
++ /*-------------------------------------------------------------------------*/
++ 
+++/*
+++ * Provide a regmap interface, which is registered with the NVMEM
+++ * framework
+++*/
+++static int at24_regmap_read(void *context, const void *reg, size_t reg_size,
+++			    void *val, size_t val_size)
+++{
+++	struct at24_data *at24 = context;
+++	off_t offset = *(u32 *)reg;
+++	int err;
+++
+++	err = at24_read(at24, val, offset, val_size);
+++	if (err)
+++		return err;
+++	return 0;
+++}
+++
+++static int at24_regmap_write(void *context, const void *data, size_t count)
+++{
+++	struct at24_data *at24 = context;
+++	const char *buf;
+++	u32 offset;
+++	size_t len;
+++	int err;
+++
+++	memcpy(&offset, data, sizeof(offset));
+++	buf = (const char *)data + sizeof(offset);
+++	len = count - sizeof(offset);
+++
+++	err = at24_write(at24, buf, offset, len);
+++	if (err)
+++		return err;
+++	return 0;
+++}
+++
+++static const struct regmap_bus at24_regmap_bus = {
+++	.read = at24_regmap_read,
+++	.write = at24_regmap_write,
+++	.reg_format_endian_default = REGMAP_ENDIAN_NATIVE,
+++};
+++
+++/*-------------------------------------------------------------------------*/
+++
++ #ifdef CONFIG_OF
++ static void at24_get_ofdata(struct i2c_client *client,
++ 		struct at24_platform_data *chip)
++@@ -481,6 +507,7 @@ static int at24_probe(struct i2c_client *client, const struct i2c_device_id *id)
++ 	struct at24_data *at24;
++ 	int err;
++ 	unsigned i, num_addresses;
+++	struct regmap *regmap;
++ 
++ 	if (client->dev.platform_data) {
++ 		chip = *(struct at24_platform_data *)client->dev.platform_data;
++@@ -573,16 +600,6 @@ static int at24_probe(struct i2c_client *client, const struct i2c_device_id *id)
++ 	at24->chip = chip;
++ 	at24->num_addresses = num_addresses;
++ 
++-	/*
++-	 * Export the EEPROM bytes through sysfs, since that's convenient.
++-	 * By default, only root should see the data (maybe passwords etc)
++-	 */
++-	sysfs_bin_attr_init(&at24->bin);
++-	at24->bin.attr.name = "eeprom";
++-	at24->bin.attr.mode = chip.flags & AT24_FLAG_IRUGO ? S_IRUGO : S_IRUSR;
++-	at24->bin.read = at24_bin_read;
++-	at24->bin.size = chip.byte_len;
++-
++ 	at24->macc.read = at24_macc_read;
++ 
++ 	writable = !(chip.flags & AT24_FLAG_READONLY);
++@@ -593,9 +610,6 @@ static int at24_probe(struct i2c_client *client, const struct i2c_device_id *id)
++ 
++ 			at24->macc.write = at24_macc_write;
++ 
++-			at24->bin.write = at24_bin_write;
++-			at24->bin.attr.mode |= S_IWUSR;
++-
++ 			if (write_max > io_limit)
++ 				write_max = io_limit;
++ 			if (use_smbus && write_max > I2C_SMBUS_BLOCK_MAX)
++@@ -627,14 +641,38 @@ static int at24_probe(struct i2c_client *client, const struct i2c_device_id *id)
++ 		}
++ 	}
++ 
++-	err = sysfs_create_bin_file(&client->dev.kobj, &at24->bin);
++-	if (err)
+++	at24->regmap_config.reg_bits = 32;
+++	at24->regmap_config.val_bits = 8;
+++	at24->regmap_config.reg_stride = 1;
+++	at24->regmap_config.max_register = chip.byte_len - 1;
+++
+++	regmap = devm_regmap_init(&client->dev, &at24_regmap_bus, at24,
+++				  &at24->regmap_config);
+++	if (IS_ERR(regmap)) {
+++		dev_err(&client->dev, "regmap init failed\n");
+++		err = PTR_ERR(regmap);
++ 		goto err_clients;
+++	}
+++
+++	at24->nvmem_config.name = dev_name(&client->dev);
+++	at24->nvmem_config.dev = &client->dev;
+++	at24->nvmem_config.read_only = !writable;
+++	at24->nvmem_config.root_only = true;
+++	at24->nvmem_config.owner = THIS_MODULE;
+++	at24->nvmem_config.compat = true;
+++	at24->nvmem_config.base_dev = &client->dev;
+++
+++	at24->nvmem = nvmem_register(&at24->nvmem_config);
+++
+++	if (IS_ERR(at24->nvmem)) {
+++		err = PTR_ERR(at24->nvmem);
+++		goto err_clients;
+++	}
++ 
++ 	i2c_set_clientdata(client, at24);
++ 
++-	dev_info(&client->dev, "%zu byte %s EEPROM, %s, %u bytes/write\n",
++-		at24->bin.size, client->name,
+++	dev_info(&client->dev, "%u byte %s EEPROM, %s, %u bytes/write\n",
+++		chip.byte_len, client->name,
++ 		writable ? "writable" : "read-only", at24->write_max);
++ 	if (use_smbus == I2C_SMBUS_WORD_DATA ||
++ 	    use_smbus == I2C_SMBUS_BYTE_DATA) {
++@@ -663,7 +701,8 @@ static int at24_remove(struct i2c_client *client)
++ 	int i;
++ 
++ 	at24 = i2c_get_clientdata(client);
++-	sysfs_remove_bin_file(&client->dev.kobj, &at24->bin);
+++
+++	nvmem_unregister(at24->nvmem);
++ 
++ 	for (i = 1; i < at24->num_addresses; i++)
++ 		i2c_unregister_device(at24->client[i]);
++-- 
++2.9.0
++
+Index: lede/target/linux/omap/patches-4.4/0003-misc-at24-replace-memory_accessor-with-nvmem_device_.patch
+===================================================================
+--- /dev/null
++++ lede/target/linux/omap/patches-4.4/0003-misc-at24-replace-memory_accessor-with-nvmem_device_.patch
+@@ -0,0 +1,224 @@
++From bec3c11bad0e7ac05fb90f204d0ab6f79945822b Mon Sep 17 00:00:00 2001
++From: Andrew Lunn <andrew@lunn.ch>
++Date: Fri, 26 Feb 2016 20:59:24 +0100
++Subject: [PATCH] misc: at24: replace memory_accessor with nvmem_device_read
++
++Now that the AT24 uses the NVMEM framework, replace the
++memory_accessor in the setup() callback with nvmem API calls.
++
++Signed-off-by: Andrew Lunn <andrew@lunn.ch>
++Acked-by: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
++Tested-by: Sekhar Nori <nsekhar@ti.com>
++Acked-by: Wolfram Sang <wsa@the-dreams.de>
++Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
++---
++ arch/arm/mach-davinci/board-mityomapl138.c |  5 +++--
++ arch/arm/mach-davinci/common.c             |  4 ++--
++ drivers/misc/eeprom/at24.c                 | 31 +-----------------------------
++ include/linux/davinci_emac.h               |  4 ++--
++ include/linux/memory.h                     | 11 -----------
++ include/linux/platform_data/at24.h         | 10 +++++-----
++ 6 files changed, 13 insertions(+), 52 deletions(-)
++
++diff --git a/arch/arm/mach-davinci/board-mityomapl138.c b/arch/arm/mach-davinci/board-mityomapl138.c
++index de1316b..62ebac5 100644
++--- a/arch/arm/mach-davinci/board-mityomapl138.c
+++++ b/arch/arm/mach-davinci/board-mityomapl138.c
++@@ -115,13 +115,14 @@ static void mityomapl138_cpufreq_init(const char *partnum)
++ static void mityomapl138_cpufreq_init(const char *partnum) { }
++ #endif
++ 
++-static void read_factory_config(struct memory_accessor *a, void *context)
+++static void read_factory_config(struct nvmem_device *nvmem, void *context)
++ {
++ 	int ret;
++ 	const char *partnum = NULL;
++ 	struct davinci_soc_info *soc_info = &davinci_soc_info;
++ 
++-	ret = a->read(a, (char *)&factory_config, 0, sizeof(factory_config));
+++	ret = nvmem_device_read(nvmem, 0, sizeof(factory_config),
+++				&factory_config);
++ 	if (ret != sizeof(struct factory_config)) {
++ 		pr_warn("Read Factory Config Failed: %d\n", ret);
++ 		goto bad_config;
++diff --git a/arch/arm/mach-davinci/common.c b/arch/arm/mach-davinci/common.c
++index a794f6d..f55ef2e 100644
++--- a/arch/arm/mach-davinci/common.c
+++++ b/arch/arm/mach-davinci/common.c
++@@ -28,13 +28,13 @@ EXPORT_SYMBOL(davinci_soc_info);
++ void __iomem *davinci_intc_base;
++ int davinci_intc_type;
++ 
++-void davinci_get_mac_addr(struct memory_accessor *mem_acc, void *context)
+++void davinci_get_mac_addr(struct nvmem_device *nvmem, void *context)
++ {
++ 	char *mac_addr = davinci_soc_info.emac_pdata->mac_addr;
++ 	off_t offset = (off_t)context;
++ 
++ 	/* Read MAC addr from EEPROM */
++-	if (mem_acc->read(mem_acc, mac_addr, offset, ETH_ALEN) == ETH_ALEN)
+++	if (nvmem_device_read(nvmem, offset, ETH_ALEN, mac_addr) == ETH_ALEN)
++ 		pr_info("Read MAC addr from EEPROM: %pM\n", mac_addr);
++ }
++ 
++diff --git a/drivers/misc/eeprom/at24.c b/drivers/misc/eeprom/at24.c
++index f15cda9..089d694 100644
++--- a/drivers/misc/eeprom/at24.c
+++++ b/drivers/misc/eeprom/at24.c
++@@ -56,7 +56,6 @@
++ 
++ struct at24_data {
++ 	struct at24_platform_data chip;
++-	struct memory_accessor macc;
++ 	int use_smbus;
++ 	int use_smbus_write;
++ 
++@@ -410,30 +409,6 @@ static ssize_t at24_write(struct at24_data *at24, const char *buf, loff_t off,
++ /*-------------------------------------------------------------------------*/
++ 
++ /*
++- * This lets other kernel code access the eeprom data. For example, it
++- * might hold a board's Ethernet address, or board-specific calibration
++- * data generated on the manufacturing floor.
++- */
++-
++-static ssize_t at24_macc_read(struct memory_accessor *macc, char *buf,
++-			 off_t offset, size_t count)
++-{
++-	struct at24_data *at24 = container_of(macc, struct at24_data, macc);
++-
++-	return at24_read(at24, buf, offset, count);
++-}
++-
++-static ssize_t at24_macc_write(struct memory_accessor *macc, const char *buf,
++-			  off_t offset, size_t count)
++-{
++-	struct at24_data *at24 = container_of(macc, struct at24_data, macc);
++-
++-	return at24_write(at24, buf, offset, count);
++-}
++-
++-/*-------------------------------------------------------------------------*/
++-
++-/*
++  * Provide a regmap interface, which is registered with the NVMEM
++  * framework
++ */
++@@ -600,16 +575,12 @@ static int at24_probe(struct i2c_client *client, const struct i2c_device_id *id)
++ 	at24->chip = chip;
++ 	at24->num_addresses = num_addresses;
++ 
++-	at24->macc.read = at24_macc_read;
++-
++ 	writable = !(chip.flags & AT24_FLAG_READONLY);
++ 	if (writable) {
++ 		if (!use_smbus || use_smbus_write) {
++ 
++ 			unsigned write_max = chip.page_size;
++ 
++-			at24->macc.write = at24_macc_write;
++-
++ 			if (write_max > io_limit)
++ 				write_max = io_limit;
++ 			if (use_smbus && write_max > I2C_SMBUS_BLOCK_MAX)
++@@ -683,7 +654,7 @@ static int at24_probe(struct i2c_client *client, const struct i2c_device_id *id)
++ 
++ 	/* export data to kernel code */
++ 	if (chip.setup)
++-		chip.setup(&at24->macc, chip.context);
+++		chip.setup(at24->nvmem, chip.context);
++ 
++ 	return 0;
++ 
++diff --git a/include/linux/davinci_emac.h b/include/linux/davinci_emac.h
++index 5428885..05b9714 100644
++--- a/include/linux/davinci_emac.h
+++++ b/include/linux/davinci_emac.h
++@@ -12,7 +12,7 @@
++ #define _LINUX_DAVINCI_EMAC_H
++ 
++ #include <linux/if_ether.h>
++-#include <linux/memory.h>
+++#include <linux/nvmem-consumer.h>
++ 
++ struct mdio_platform_data {
++ 	unsigned long		bus_freq;
++@@ -46,5 +46,5 @@ enum {
++ 	EMAC_VERSION_2,	/* DM646x */
++ };
++ 
++-void davinci_get_mac_addr(struct memory_accessor *mem_acc, void *context);
+++void davinci_get_mac_addr(struct nvmem_device *nvmem, void *context);
++ #endif
++diff --git a/include/linux/memory.h b/include/linux/memory.h
++index 8b8d8d1..b723a68 100644
++--- a/include/linux/memory.h
+++++ b/include/linux/memory.h
++@@ -137,17 +137,6 @@ extern struct memory_block *find_memory_block(struct mem_section *);
++ #endif
++ 
++ /*
++- * 'struct memory_accessor' is a generic interface to provide
++- * in-kernel access to persistent memory such as i2c or SPI EEPROMs
++- */
++-struct memory_accessor {
++-	ssize_t (*read)(struct memory_accessor *, char *buf, off_t offset,
++-			size_t count);
++-	ssize_t (*write)(struct memory_accessor *, const char *buf,
++-			 off_t offset, size_t count);
++-};
++-
++-/*
++  * Kernel text modification mutex, used for code patching. Users of this lock
++  * can sleep.
++  */
++diff --git a/include/linux/platform_data/at24.h b/include/linux/platform_data/at24.h
++index c42aa89..dc9a13e 100644
++--- a/include/linux/platform_data/at24.h
+++++ b/include/linux/platform_data/at24.h
++@@ -9,7 +9,7 @@
++ #define _LINUX_AT24_H
++ 
++ #include <linux/types.h>
++-#include <linux/memory.h>
+++#include <linux/nvmem-consumer.h>
++ 
++ /**
++  * struct at24_platform_data - data to set up at24 (generic eeprom) driver
++@@ -17,7 +17,7 @@
++  * @page_size: number of byte which can be written in one go
++  * @flags: tunable options, check AT24_FLAG_* defines
++  * @setup: an optional callback invoked after eeprom is probed; enables kernel
++-	code to access eeprom via memory_accessor, see example
+++	code to access eeprom via nvmem, see example
++  * @context: optional parameter passed to setup()
++  *
++  * If you set up a custom eeprom type, please double-check the parameters.
++@@ -26,13 +26,13 @@
++  *
++  * An example in pseudo code for a setup() callback:
++  *
++- * void get_mac_addr(struct memory_accessor *mem_acc, void *context)
+++ * void get_mac_addr(struct mvmem_device *nvmem, void *context)
++  * {
++  *	u8 *mac_addr = ethernet_pdata->mac_addr;
++  *	off_t offset = context;
++  *
++  *	// Read MAC addr from EEPROM
++- *	if (mem_acc->read(mem_acc, mac_addr, offset, ETH_ALEN) == ETH_ALEN)
+++ *	if (nvmem_device_read(nvmem, offset, ETH_ALEN, mac_addr) == ETH_ALEN)
++  *		pr_info("Read MAC addr from EEPROM: %pM\n", mac_addr);
++  * }
++  *
++@@ -48,7 +48,7 @@ struct at24_platform_data {
++ #define AT24_FLAG_IRUGO		0x20	/* sysfs-entry will be world-readable */
++ #define AT24_FLAG_TAKE8ADDR	0x10	/* take always 8 addresses (24c00) */
++ 
++-	void		(*setup)(struct memory_accessor *, void *context);
+++	void		(*setup)(struct nvmem_device *nvmem, void *context);
++ 	void		*context;
++ };
++ 
++-- 
++2.9.0
++
+Index: lede/target/linux/omap/patches-4.4/0005-eeprom-at24-remove-nvmem-regmap-dependency.patch
+===================================================================
+--- /dev/null
++++ lede/target/linux/omap/patches-4.4/0005-eeprom-at24-remove-nvmem-regmap-dependency.patch
+@@ -0,0 +1,227 @@
++From cf0361a2d2b809c6f5b73313544711648fd7afdd Mon Sep 17 00:00:00 2001
++From: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
++Date: Sun, 24 Apr 2016 20:28:06 +0100
++Subject: [PATCH] eeprom: at24: remove nvmem regmap dependency
++
++This patch moves to nvmem support in the driver to use callback instead
++of regmap.
++
++Signed-off-by: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
++Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
++---
++ drivers/misc/eeprom/Kconfig |   1 -
++ drivers/misc/eeprom/at24.c  | 103 ++++++++++----------------------------------
++ 2 files changed, 22 insertions(+), 82 deletions(-)
++
++diff --git a/drivers/misc/eeprom/Kconfig b/drivers/misc/eeprom/Kconfig
++index cfc493c..2d70464 100644
++--- a/drivers/misc/eeprom/Kconfig
+++++ b/drivers/misc/eeprom/Kconfig
++@@ -3,7 +3,6 @@ menu "EEPROM support"
++ config EEPROM_AT24
++ 	tristate "I2C EEPROMs / RAMs / ROMs from most vendors"
++ 	depends on I2C && SYSFS
++-	select REGMAP
++ 	select NVMEM
++ 	help
++ 	  Enable this driver to get read/write support to most I2C EEPROMs
++diff --git a/drivers/misc/eeprom/at24.c b/drivers/misc/eeprom/at24.c
++index 089d694..de550a6 100644
++--- a/drivers/misc/eeprom/at24.c
+++++ b/drivers/misc/eeprom/at24.c
++@@ -23,7 +23,6 @@
++ #include <linux/acpi.h>
++ #include <linux/i2c.h>
++ #include <linux/nvmem-provider.h>
++-#include <linux/regmap.h>
++ #include <linux/platform_data/at24.h>
++ 
++ /*
++@@ -69,7 +68,6 @@ struct at24_data {
++ 	unsigned write_max;
++ 	unsigned num_addresses;
++ 
++-	struct regmap_config regmap_config;
++ 	struct nvmem_config nvmem_config;
++ 	struct nvmem_device *nvmem;
++ 
++@@ -252,10 +250,10 @@ static ssize_t at24_eeprom_read(struct at24_data *at24, char *buf,
++ 	return -ETIMEDOUT;
++ }
++ 
++-static ssize_t at24_read(struct at24_data *at24,
++-		char *buf, loff_t off, size_t count)
+++static int at24_read(void *priv, unsigned int off, void *val, size_t count)
++ {
++-	ssize_t retval = 0;
+++	struct at24_data *at24 = priv;
+++	char *buf = val;
++ 
++ 	if (unlikely(!count))
++ 		return count;
++@@ -267,23 +265,21 @@ static ssize_t at24_read(struct at24_data *at24,
++ 	mutex_lock(&at24->lock);
++ 
++ 	while (count) {
++-		ssize_t	status;
+++		int	status;
++ 
++ 		status = at24_eeprom_read(at24, buf, off, count);
++-		if (status <= 0) {
++-			if (retval == 0)
++-				retval = status;
++-			break;
+++		if (status < 0) {
+++			mutex_unlock(&at24->lock);
+++			return status;
++ 		}
++ 		buf += status;
++ 		off += status;
++ 		count -= status;
++-		retval += status;
++ 	}
++ 
++ 	mutex_unlock(&at24->lock);
++ 
++-	return retval;
+++	return 0;
++ }
++ 
++ /*
++@@ -372,13 +368,13 @@ static ssize_t at24_eeprom_write(struct at24_data *at24, const char *buf,
++ 	return -ETIMEDOUT;
++ }
++ 
++-static ssize_t at24_write(struct at24_data *at24, const char *buf, loff_t off,
++-			  size_t count)
+++static int at24_write(void *priv, unsigned int off, void *val, size_t count)
++ {
++-	ssize_t retval = 0;
+++	struct at24_data *at24 = priv;
+++	char *buf = val;
++ 
++ 	if (unlikely(!count))
++-		return count;
+++		return -EINVAL;
++ 
++ 	/*
++ 	 * Write data to chip, protecting against concurrent updates
++@@ -387,70 +383,23 @@ static ssize_t at24_write(struct at24_data *at24, const char *buf, loff_t off,
++ 	mutex_lock(&at24->lock);
++ 
++ 	while (count) {
++-		ssize_t	status;
+++		int status;
++ 
++ 		status = at24_eeprom_write(at24, buf, off, count);
++-		if (status <= 0) {
++-			if (retval == 0)
++-				retval = status;
++-			break;
+++		if (status < 0) {
+++			mutex_unlock(&at24->lock);
+++			return status;
++ 		}
++ 		buf += status;
++ 		off += status;
++ 		count -= status;
++-		retval += status;
++ 	}
++ 
++ 	mutex_unlock(&at24->lock);
++ 
++-	return retval;
++-}
++-
++-/*-------------------------------------------------------------------------*/
++-
++-/*
++- * Provide a regmap interface, which is registered with the NVMEM
++- * framework
++-*/
++-static int at24_regmap_read(void *context, const void *reg, size_t reg_size,
++-			    void *val, size_t val_size)
++-{
++-	struct at24_data *at24 = context;
++-	off_t offset = *(u32 *)reg;
++-	int err;
++-
++-	err = at24_read(at24, val, offset, val_size);
++-	if (err)
++-		return err;
++-	return 0;
++-}
++-
++-static int at24_regmap_write(void *context, const void *data, size_t count)
++-{
++-	struct at24_data *at24 = context;
++-	const char *buf;
++-	u32 offset;
++-	size_t len;
++-	int err;
++-
++-	memcpy(&offset, data, sizeof(offset));
++-	buf = (const char *)data + sizeof(offset);
++-	len = count - sizeof(offset);
++-
++-	err = at24_write(at24, buf, offset, len);
++-	if (err)
++-		return err;
++ 	return 0;
++ }
++ 
++-static const struct regmap_bus at24_regmap_bus = {
++-	.read = at24_regmap_read,
++-	.write = at24_regmap_write,
++-	.reg_format_endian_default = REGMAP_ENDIAN_NATIVE,
++-};
++-
++-/*-------------------------------------------------------------------------*/
++-
++ #ifdef CONFIG_OF
++ static void at24_get_ofdata(struct i2c_client *client,
++ 		struct at24_platform_data *chip)
++@@ -482,7 +431,6 @@ static int at24_probe(struct i2c_client *client, const struct i2c_device_id *id)
++ 	struct at24_data *at24;
++ 	int err;
++ 	unsigned i, num_addresses;
++-	struct regmap *regmap;
++ 
++ 	if (client->dev.platform_data) {
++ 		chip = *(struct at24_platform_data *)client->dev.platform_data;
++@@ -612,19 +560,6 @@ static int at24_probe(struct i2c_client *client, const struct i2c_device_id *id)
++ 		}
++ 	}
++ 
++-	at24->regmap_config.reg_bits = 32;
++-	at24->regmap_config.val_bits = 8;
++-	at24->regmap_config.reg_stride = 1;
++-	at24->regmap_config.max_register = chip.byte_len - 1;
++-
++-	regmap = devm_regmap_init(&client->dev, &at24_regmap_bus, at24,
++-				  &at24->regmap_config);
++-	if (IS_ERR(regmap)) {
++-		dev_err(&client->dev, "regmap init failed\n");
++-		err = PTR_ERR(regmap);
++-		goto err_clients;
++-	}
++-
++ 	at24->nvmem_config.name = dev_name(&client->dev);
++ 	at24->nvmem_config.dev = &client->dev;
++ 	at24->nvmem_config.read_only = !writable;
++@@ -632,6 +567,12 @@ static int at24_probe(struct i2c_client *client, const struct i2c_device_id *id)
++ 	at24->nvmem_config.owner = THIS_MODULE;
++ 	at24->nvmem_config.compat = true;
++ 	at24->nvmem_config.base_dev = &client->dev;
+++	at24->nvmem_config.reg_read = at24_read;
+++	at24->nvmem_config.reg_write = at24_write;
+++	at24->nvmem_config.priv = at24;
+++	at24->nvmem_config.stride = 4;
+++	at24->nvmem_config.word_size = 1;
+++	at24->nvmem_config.size = chip.byte_len;
++ 
++ 	at24->nvmem = nvmem_register(&at24->nvmem_config);
++ 
++-- 
++2.9.0
++
