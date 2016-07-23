@@ -317,3 +317,28 @@ Index: lede/target/linux/omap/patches-4.4/150-cape-pinmux-helper.patch
 + obj-$(CONFIG_GENWQE)		+= genwqe/
 + obj-$(CONFIG_ECHO)		+= echo/
 + obj-$(CONFIG_VEXPRESS_SYSCFG)	+= vexpress-syscfg.o
+Index: lede/target/linux/omap/modules.mk
+===================================================================
+--- lede.orig/target/linux/omap/modules.mk
++++ lede/target/linux/omap/modules.mk
+@@ -22,3 +22,20 @@ endef
+ 
+ $(eval $(call KernelPackage,cape-manager))
+ 
++define KernelPackage/bone-pinmux-helper
++  SUBMENU:=$(OTHER_MENU)
++  TITLE:=Cape Manager
++  DEPENDS:=@TARGET_omap
++  KCONFIG:= \
++  	CONFIG_BEAGLEBONE_PINMUX_HELPER
++  FILES:=\
++  	$(LINUX_DIR)/drivers/misc/cape/beaglebone/bone-pinmux-helper.ko
++  AUTOLOAD:=$(call AutoProbe,bone-pinmux-helper)
++endef
++
++define KernelPackage/bone-pinmux-helper/description
++  Beagle bone pinmux helper (used by capes)
++endef
++
++$(eval $(call KernelPackage,bone-pinmux-helper))
++
