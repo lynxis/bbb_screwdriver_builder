@@ -57,6 +57,7 @@ lava-dispatcher
 am33x-cm3
 kmod-eeprom-at24
 kmod-cape-manager
+kmod-bone-pinmux-helper
 
 # GUI
 # luci-theme-bootstrap
