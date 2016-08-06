@@ -12,3 +12,4 @@
 0043-dtc-build.patch
 0044-add-dts-pinmux-helper.patch
 0045-use-beagleboard-dts-files.patch
+0046-add-spi-alias.patch

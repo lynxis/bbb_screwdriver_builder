@@ -1,0 +1,18 @@
+Index: lede/target/linux/omap/patches-4.4/100-omap-fix-spi-alias.patch
+===================================================================
+--- /dev/null
++++ lede/target/linux/omap/patches-4.4/100-omap-fix-spi-alias.patch
+@@ -0,0 +1,13 @@
++Index: linux-4.4.13/arch/arm/boot/dts/am33xx.dtsi
++===================================================================
++--- linux-4.4.13.orig/arch/arm/boot/dts/am33xx.dtsi
+++++ linux-4.4.13/arch/arm/boot/dts/am33xx.dtsi
++@@ -35,6 +35,8 @@
++ 		phy1 = &usb1_phy;
++ 		ethernet0 = &cpsw_emac0;
++ 		ethernet1 = &cpsw_emac1;
+++		spi0 = &spi0;
+++		spi1 = &spi1;
++ 	};
++ 
++ 	cpus {
