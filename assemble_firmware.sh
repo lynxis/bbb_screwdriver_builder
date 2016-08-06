@@ -129,9 +129,14 @@ if [ -z "$PROFILES" ] ; then
 	exit 1
 fi
 
-if [ -n "$FILES" -a ! -d "$FILES" ] ; then
-	info "Ignoring files directory! $FILES does not exit"
-	FILES=""
+if [ -n "$FILES" ] ; then
+	if [ ! -d "$FILES" ] ; then
+		info "Ignoring files directory! $FILES does not exit"
+		FILES=""
+	else
+		# $FILE dir exists lets get an absolute reference
+		FILES=$(readlink -f $FILES)
+	fi
 fi
 
 mkdir -p "$TEMP_DIR"
