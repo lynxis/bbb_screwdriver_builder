@@ -15,6 +15,7 @@ set -e
 IB_FILE=""
 PROFILES=""
 TEMP_DIR=""
+FILES=""
 PKGLIST_DIR="$(dirname "$0")/packages"
 DEST_DIR="$(dirname "$0")/firmwares"
 DEBUG=""
@@ -69,17 +70,21 @@ $0 -i <IB_FILE> -p <profile>
 -t <dir> destination directory where to save the files
 -l <dir> (optional) directory to the package lists
 -n <dir> (optional) path to a temp directory
+-f <dir> (optional) path to a files directory. Files will be copied into / of the resulting image.
 -u <list> usecase. seperate multiple usecases by a space
 "
 }
 
-while getopts "di:l:n:p:t:u:" option; do
+while getopts "di:l:n:p:t:u:f:" option; do
         case "$option" in
 		d)
 			DEBUG=y
 			;;
                 i)
                         IB_FILE="$OPTARG"
+                        ;;
+                f)
+                        FILES="$OPTARG"
                         ;;
                 p)
                         PROFILES="$OPTARG"
@@ -124,6 +129,11 @@ if [ -z "$PROFILES" ] ; then
 	exit 1
 fi
 
+if [ -n "$FILES" -a ! -d "$FILES" ] ; then
+	info "Ignoring files directory! $FILES does not exit"
+	FILES=""
+fi
+
 mkdir -p "$TEMP_DIR"
 trap signal_handler 0 1 2 3 15
 
@@ -161,6 +171,10 @@ for profile in "$PROFILES" ; do
 		if [ -f "$hookfile" ]; then
 			info "Using a post inst hook."
 			img_params="$img_params CUSTOM_POSTINST_SCRIPT=$hookfile"
+		fi
+
+		if [ -n "$FILES" ] ; then
+			img_params="$img_params FILES=$FILES"
 		fi
 
 		packages=$(parse_pkg_list_file "${PKGLIST_DIR}/${package_list}.txt")
