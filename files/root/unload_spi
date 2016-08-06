@@ -1,0 +1,28 @@
+#!/bin/sh
+
+DTS=LX-DISABLE-SPI0
+CONFLICT=LX-ENABLE-SPI0
+
+DEBUG=0
+
+debug() {
+	[ $DEBUG -ne 1 ] && return
+	echo "$@"
+}
+
+# check if also ready present
+if grep -q "$DTS" /sys/devices/platform/bone_capemgr/slots ; then
+	debug "DTS already loaded"
+	exit 0
+fi
+
+# unload if conflict present
+if grep -q "$CONFLICT" /sys/devices/platform/bone_capemgr/slots ; then
+	debug "Unloading $CONFLICT"
+	SLOT=$(grep "$CONFLICT" /sys/devices/platform/bone_capemgr/slots  | awk -F: '{ print $1 }' | awk '{ print $1 }')
+	echo "-$SLOT" > /sys/devices/platform/bone_capemgr/slots
+fi
+
+# loading dts
+debug "Loading $DTS"
+echo "$DTS" > /sys/devices/platform/bone_capemgr/slots
