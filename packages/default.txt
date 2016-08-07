@@ -65,4 +65,5 @@ kmod-bone-pinmux-helper
 # uhttpd-mod-ubus
 # uhttpd-mod-tls
 # px5g
+python-readline
 
