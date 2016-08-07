@@ -1,4 +1,5 @@
 0001-omap-add-sdcard-creation-script.patch
+0005-linux-generic-add-usb-gadget-fix-which-allows-a-smoo.patch
 0007-omap-boot-dir-to-hold-bootloader-somewhere.patch
 0009-another-try-to-fix-musb-iwth-am3xx.patch
 0032-set-password-to-coreboot.patch
