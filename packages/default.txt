@@ -66,4 +66,5 @@ kmod-bone-pinmux-helper
 # uhttpd-mod-tls
 # px5g
 python-readline
+python-daemon
 
