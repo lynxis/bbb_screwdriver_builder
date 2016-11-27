@@ -30,7 +30,7 @@ kmod-usb-phy-omap-usb2
 kmod-usb-phy-am335x
 kmod-usb-musb-hdrc
 kmod-usb-musb-platformglue
-kmod-usb-ehci-debug-gadget
+kmod-usb-gadget-ehci-debug
 kmod-usb-phy-twl4030
 kmod-usb-phy-twl6030
 
