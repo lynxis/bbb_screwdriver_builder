@@ -3,14 +3,4 @@
 0007-omap-boot-dir-to-hold-bootloader-somewhere.patch
 0009-another-try-to-fix-musb-iwth-am3xx.patch
 0032-set-password-to-coreboot.patch
-0033-misc-Beaglebone-capemanager.patch
-0034-enable-capemgr.patch
-0035-compile-cape-mgr-as-module.patch
-0036-enable-nvmem.patch
-0039-at24-backport.patch
-0040-nvmem-backports.patch
-0041-tda998x.patch
-0043-dtc-build.patch
-0044-add-dts-pinmux-helper.patch
-0045-use-beagleboard-dts-files.patch
 0046-add-spi-alias.patch
