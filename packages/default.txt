@@ -50,8 +50,6 @@ kmod-rtl8192cu
 kmod-rtlwifi-usb
 
 openvpn-polarssl
-lava-tool
-lava-dispatcher
 
 # power management ti
 am33x-cm3
@@ -65,6 +63,3 @@ kmod-bone-pinmux-helper
 # uhttpd-mod-ubus
 # uhttpd-mod-tls
 # px5g
-python-readline
-python-daemon
-
